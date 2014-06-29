@@ -1,0 +1,41 @@
+%%option prefix="%n"
+%%option outfile="lex.yy.c"
+
+%%{
+/*
+ *  Options at the beginning of the file are here to enable multiple
+ *  scanners to be linked into the same binary. However the name is
+ *  forced to the common file name to preserve compatibility with
+ *  auto-build tools that expect the scanner to generate "lex.yy.c"
+ *  files, the `traditional' way.
+ */
+
+/**
+ *  @file   %b
+ *  @brief  
+ *
+ *  Change log:
+ *
+ *  - %d-%m-%Y %( (profile-current-name) %) <%( (profile-current-mailing-address) %)>
+ *    Creation of the file.
+ *
+ */
+
+/**
+ *  %( (profile-current-eval 'short-license) %)
+ *
+ *  Copyright (C) %Y, %( (profile-current-name) %)
+ */
+
+/*
+ *  More often than otherwise, the scanner is used with a parser. This
+ *  functionality requires the parser to generate a header file. This
+ *  is accomplished by passing the `-d' flag to parsers such as `yacc'.
+ */
+#include <%n_parser.h>
+
+%%}
+
+%%%%
+
+%%%%
