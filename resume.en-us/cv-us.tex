@@ -1,0 +1,353 @@
+% cv-us.tex
+% $Id: cv-us.tex,v 1.28 2006/12/12 22:53:52 jrblevin Exp $
+%
+% LaTeX Curriculum Vitae Template
+%
+% Copyright (C) 2004-2006 Jason R. Blevins
+%
+% You may use use this document as a template to create your own CV
+% and you may redistribute the source code freely. No attribution is
+% required in any resulting documents, however, I do ask that you
+% please leave this notice and the above URL in the source code if you
+% choose to redistribute this file.
+%
+% Jason R. Blevins <jrblevin@sdf.lonestar.org>
+% http://jrblevin.freeshell.org
+% Durham, December 12, 2006
+%
+%----------------------------------------------------------------------------%
+% Copyright (C) 2007 Sylvain Bougerel
+%
+% Modification of the template. You are granted the same right as in the
+% original document (see above). Likewise, the name of the orginial author
+% and my name, and both copyrights should be left in the source code.
+%
+% Sylvain Bougerel
+% Singapore, 12th July 2007
+%
+%%---------------------------------------------------------------------------%
+%
+% Notes:
+%
+% * Don't forget to change `pdfauthor' and `keywords' in the \hypersetup
+%   section below.
+%
+% * To create a new page use: \newpage \opening
+%
+% * res.cls includes an \address{} command which can be used up to twice,
+%   but my address is too long for the format it uses.
+%
+% * Alternate documentclass statement to put headings in margin:
+%   \documentclass[margin,line,11pt,final]{res}
+%
+% * Can divide publication/presentation list into subsections by year:
+%   \section{\bf\small\hspace{8mm}2006}
+%
+%%----------------------------------------------------------------------------%
+
+\documentclass[overlapped,line,letterpaper]{res}
+
+\usepackage{ifpdf}
+
+\ifpdf
+\usepackage[pdftex]{hyperref}
+\else
+\usepackage[hypertex]{hyperref}
+\fi
+
+\hypersetup{
+  letterpaper,
+  colorlinks,
+  urlcolor=black,
+  pdfpagemode=none,
+  pdftitle={Curriculum Vitae},
+  pdfauthor={Sylvain Bougerel},
+  pdfcreator={$ $Id: cv-us.tex, v0.01 12/07/2007 00:40:18 Sylvain Bougerel $ $},
+  pdfsubject={Curriculum Vitae},
+  pdfkeywords={sylvain bougerel singapore linux unix C++ java C\# distributed
+    computing high-availability large-scale command control quality team leadership
+    gtk valgrind gcc gdb openvz}
+}
+
+%%===========================================================================%%
+
+\begin{document}
+
+%---------------------------------------------------------------------------
+% Document Specific Customizations
+
+% Make lists without bullets and with no indentation
+\setlength{\leftmargini}{0em}
+\renewcommand{\labelitemi}{}
+
+% Use large bold font for printed name at top of pages
+\renewcommand{\namefont}{\large\textbf}
+
+%---------------------------------------------------------------------------
+
+\name{Sylvain Bougerel}
+\address{3 Petain Road\\
+  \#03-01 Residences @ Somme\\
+  Singapore 208108
+}
+\address{tel: +65 96673473\\
+  email: sylvain.bougerel@gmail.com}
+
+\begin{resume}
+
+  %---------------------------------------------------------------------------
+
+  \section{\bf General}
+  French nationality. Born on 23rd September 1981 (29 years old).
+
+  Fluent in French and English, basic conversational German.
+
+  %---------------------------------------------------------------------------
+
+  \section{\bf Education}
+
+  \begin{format}
+    \title{l}\dates{r}\\
+    \body\\
+  \end{format}
+
+  \title{\em Master of Science in Engineering of Data Management Systems }
+  \dates{2003--2005}
+  \begin{position}
+    University of Technology of Belfort-Montb\'{e}liard, France\newline
+    Final year exchange program at the National University of Singapore
+  \end{position}
+
+  \title{\em Bachelor of Science in Software Design and Programming }
+  \dates{2000--2002}
+  \begin{position}
+    University of Paris, South, Science Faculty of Orsay, France
+  \end{position}
+
+  %---------------------------------------------------------------------------
+
+  \section{\bf Professional Experience}
+
+  %At Thales Security Asia Pte Ltd, Singapore:
+
+  \begin{format}
+    \title{l}\dates{r}\\
+    \employer{l}\location{r}\\
+    \body\\
+  \end{format}
+
+  \title{\em Software Manager (Current Position)}
+  \employer{Thales Solution Asia Pte Ltd
+    (\href{http://www.thalesgroup.com}{www.thalesgroup.com})}
+  \location{Singapore}
+  \dates{2011--Present}
+  \begin{position}
+    Heading a team of over 12 Software Engineers in a challenging project to
+    modernize the Integrated Supervision and Control System for the world's
+    second largest fully-automated underground train line: Singapore's North
+    East Line. Other responsibilities include the planning and execution of
+    the entire ISCS migration process without causing any disruption to the
+    line's operation.
+  \end{position}
+
+  \title{\em Deputy Technical Manager}
+  \employer{Thales Security Asia Pte Ltd
+    (\href{http://www.thalesgroup.com}{www.thalesgroup.com})}
+  \location{Singapore}
+  \dates{2009--2011}
+  \begin{position}
+    In charge of the design of core components interfaces in one of Thales'
+    largest integrated call center to be rolled out in 2011 for Mexico City. In
+    addition, providing design recommendations for the team of developers
+    involved in this project.
+  \end{position}
+
+  \title{\em Senior Software Developer \& Team Leader}
+  \employer{Thales Information Systems Pte Ltd
+    (\href{http://www.thalesgroup.com}{www.thalesgroup.com})}
+  \location{Singapore}
+  \dates{2005--2009}
+  \begin{position}
+    Involved in development of various civil security projects for Singapore's
+    Ministry of Home Affairs, and the design of new products for the company
+    with modern middle-ware and open-source communication technologies.
+  \end{position}
+
+  %----------------------------------------------------------------------------
+
+
+%%   \section{\bf Technical Skills}
+%%   \em{}C/C++ development\em{}: GCC, GNU Autotools (autoconf, automake, libtool),
+%%   STL, Boost, Lex/Yacc, Gdb, Gprof, Valgrind.
+
+%%   \em{}Java Frameworks\em{}: ServiceMix, ActiveMQ JMS, parts of J2EE (Java WS*,
+%%   JABX, XMLBeans).
+
+%%   \em{}.Net Framework\em{}: Microsoft Visual Studio .Net, C\#, WCF, LinQ and
+%%   Entity Framework, Ant Profiling tools.
+
+%%   \em{}Web technologies\em{}: Python, Php, Perl, Javascript, SOAP, XML, XSD,
+%%   RelaxNG, WSDL, AJAX.
+
+%%   \em{}User interface and toolkit\em{}: Qt3.3, Gtk2 with Glade, OpenGL, SDL,
+%%   X11/Motif, Swing.
+
+%%   \em{}Database and Object Modeling\em{}: UML, SQL, PL/SQL, Oracle SQL (with
+%%   experience in partitioning), PostgreSQL (with experience on Gist trees),
+%%   BerkeleyDB, MySQL, SQLlite.
+
+%%   \em{}Applications\em{}: Linux (Debian, ArchLinux, Redhat, Ubuntu, over 10 year
+%%   of personal use), CVS, SVN, Git, Emacs, Vi(m), Doxygen, Nmap, Tcpdump, Strace,
+%%   CodeSynthesis XSD, Sysprof, Vmware, Visual Studio 9, TFS, SQL Sever
+%%   2008, MS Project, MS Visio (design and code generation).
+
+%%   \em{}Quality and estimation techniques\em{}: continuous integration and unit
+%%   testing using TFS, WBS-based estimation, Function Point Analysis,
+
+  %\section{\bf Presentations}
+  %
+  %``Solving Nonlinear Wave Equations with Mathematica,''
+  %North Carolina State University, April 23, 2003.
+
+  %----------------------------------------------------------------------------
+
+  \section{\bf Professional Training and Certifications}
+
+  \begin{format}
+    \title{l}\dates{r}\\
+    %\location{l}\\
+    \body\\
+  \end{format}
+
+  \title{\em{Coached in Scrum Methodologies} }
+  \dates{March 2012--Present}
+  %\location{Singapore}
+  \begin{position}
+    With more than 300 hours of ongoing coaching in Scrum methodologies with a
+    certified Agile Consultant, I have acquired solid hand-on experience to lead
+    an Agile development team.
+  \end{position}
+
+%%   \title{\em{Passport for System Engineering} }
+%%   \dates{September 2010}
+%%   %\location{Singapore}
+%%   \begin{position}
+%%     4 days training on System Engineering methodologies applied to the work
+%%     place and provided by Thales Solution Asia Pte Ltd.
+%%   \end{position}
+
+  \title{\em{Software Development Effort Estimation} }
+  \dates{April 2010}
+  %\location{Singapore}
+  \begin{position}
+    3 days training on Function Point Analysis, one of the few ISO recognized
+    software metric.
+  \end{position}
+
+  \title{\em{RD236 Red Hat Linux Kernel Internals} }
+  \dates{April 2006}
+  %\location{Singapore}
+  \begin{position}
+    Hands-on course designed to provide a detailed examination of the
+    Linux kernel architecture and its modules.
+  \end{position}
+
+  %%===========================================================================%%
+  \newpage
+  \opening
+
+  %------------------------------------------------------------------------------
+
+  \section{\bf Details of Recent Projects}
+
+  \begin{format}
+    \title{l}\dates{r}\\
+    \body\\
+  \end{format}
+
+  \title{\em North East Line ISCS Upgrade}
+  \dates{July\ 2011--Present}
+  \begin{position}
+    This project has a unique blend of constraints with its direct impact on
+    Singapore's citizens, its very large number of interfaces, and the sheer
+    amount of functions needed to control every aspects of the line's
+    operations. Built on top of Thales' SCADA solution, the ISCS enables only 7
+    operators to run the entire fleet of 32 driver-less trains, monitor the 40km
+    of tracks, the various energy circuits (air, water, electricity) and
+    efficiently communicate among operators, contractors and with the
+    public. Development progress is tracked using DOORS, JIRA and Primavera,
+    testing automation relies on Jenkins, VMWare, Sikuli, Apache and languages
+    most used are C++, Tcl/Tk, Python, Java and shell scripts.
+  \end{position}
+
+  \title{\em Mexico Ciudad Segura (Safe Mexico City)}
+  \dates{October\ 2009--June\ 2011}
+  \begin{position}
+    Since 2009, Thales Group has been awarded with the deployment of a new
+    integrated call center and security system for Mexico City. Thales Security
+    Asia is responsible for the following core components: Computer Aided
+    Dispatch, Training and Simulation, Data Warehouse and Web Portal. Some key
+    figures: 6 operation centers to deploy, 8000 cameras to control, 25000
+    ground resources to manage, 40000 calls received per day, 8 Millions people
+    to protect. Skills in diverse technologies are required to run this
+    project: DOORS, Team Foundation Server, C\# (with .Net components WCF, WPF),
+    Sharepoint, MSSQL, ActiveMQ JMS, ServiceMix, etc.
+  \end{position}
+
+  \title{\em New coastal surveillance system}
+  \dates{May\ 2008--September\ 2009}
+  \begin{position}
+    Design and implementation of a next generation coastal surveillance system
+    while simultaneously working on the Singapore Police Coast Guard project
+    (see below). The new system shall be backward compatible, yet provide a
+    greater level of high-availability, scalability and ease of
+    development. Built on top of a Message Oriented Middle-ware with XSD
+    data-binding, ActiveMQ JMS, Web Services, JABX. Development languages
+    consists of: C++, Java and Python.
+  \end{position}
+
+  \title{\em Singapore Police Coast Guard}
+  \dates{May\ 2006--April\ 2008}
+  \begin{position}
+    Ported Singapore Police Coast Guard Surveillance System from HP--RT to Linux
+    in only 1 year. Subsequently lead a team of 5 developers to extend the code
+    base of 2 million lines with new features for an additional 8 months.
+    Involving technologies such as C++, Lex/Yacc, OpenVZ, Valgrind, Gdb,
+    X11/Motif.
+  \end{position}
+
+  \title{\em Singapore Civil Defense Force archiving system}
+  %\title{SCDF Archiving System}
+  %\title{\em Software Developer}
+  \dates{September\ 2005--April\ 2006}
+  \begin{position}
+    Design and developed over 8 months a C\#/ASP.Net--based archiving system for
+    the Singapore Civil De-fence Force with work-flow management of the
+    document.
+  \end{position}
+
+  %---------------------------------------------------------------------------
+
+  \section{\bf Personal Interests}
+
+  A Linux and open-source advocate, actively working since 2009 on the
+  open-source Spatial C++ Library, the spiritual child of the library
+  libkdtree++, which I was a formerly maintaining for a short period of time.
+
+  Additionally, a passionate badminton player, who enjoys living, traveling and
+  diving around South-East Asia.
+
+  %---------------------------------------------------------------------------
+
+  \begin{center}
+    \vspace{\fill}\ \newline
+           {\tiny \rm $ $Author: Sylvain Bougerel $ $ }
+           {\tiny \rm $ $Date: 14/12/2012 $ $ }
+           %{\tiny \rm $ $Revision: 0.1 $ $ }
+  \end{center}
+
+\end{resume}
+
+\end{document}
+
+%%===========================================================================%%
