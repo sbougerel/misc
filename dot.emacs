@@ -1,85 +1,24 @@
 ; -*- Emacs-Lisp -*-
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; COPYRIGHT
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Code:
 
+;;; COPYRIGHT
+;;;
 ;;; This file and the files distributed along with this file are totally free of
 ;;; use if they are not protected by any copyright rules present in the content
 ;;; of these files. You can modify, redistribute, copy part of this file or the
 ;;; files distributed along with this file without any restrictions if they are
 ;;; not protected by any copyright rules present in the content of these files.
-
-;;; Parts of this file are copied or inspired by examples found of the Emacs
-;;; Wiki at <http://www.emacswiki.org/>
-
+;;;
 ;;; Sylvain Bougerel
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; GUIDE LINES
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; GENERAL SETTINGS
 
-;;; This emacs configuration was made with ease of use, yet power in mind.
-
-;;; I found too much of binding `C-x C-r C-f' not very pleasant to use as it
-;;; bend my hands in very inconveniant direction.
-
-;;; Abbrevs on the contrary are very intuitive tool. I often make many abbrev do
-;;; the same thing. This empowers greatly my programming: it allows me to make
-;;; mistakes and yet, understands what I want to do.
-
-;;; This file also makes use of abbrev-swapping. In different context, you have
-;;; different abbrevs working. In a comment, the code-only abbrev will not
-;;; expand.
-
-;;; In an attempt to automatise a maximum of stuffs, tags table are also visited
-;;; automatically when I want to find a tag, auto-insertion is always activated,
-;;; the general abbrev table provide an extensive auto-correction list, and a
-;;; handful of programing design pattern are provided.
-
-;;; To sum up this Emacs configuration is aimed at making life easy without
-;;; having to memorize a pletora of command, yet retaining all the power of
-;;; Emacs.
-
-;;; This config is mainly targetted at C/C++ programmer, I am one myself and I
-;;; grew this file over years in order to be proficiant at C/C++
-;;; programming.
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; TODOS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;; Complete auto-insert templates
-
-;;; Complete tempo snippet with design patterns, in a separate
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; GENERAL SETTINGS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(server-start) ; start the server now.
-
-(setq load-path
-      (cons "~/.emacs.d/site-lisp/" load-path))
-
-(require 'profiles)
-(profile-define "others"
-                "Sylvain Bougerel" "sylvain.bougerel.devel@gmail.com"
-                'coding-style "gnu"
-                'short-license '(my-insert-file-with-prefix
-                                 "~/.emacs.d/licenses/gplv3")
-                )
-(profile-define "thales"
-                "Sylvain Bougerel" "sylvain.bougerel@asia.thalesgroup.com"
-                'coding-style "bsd" ; for compatibility with vi users
-                'short-license '(my-insert-file-with-prefix
-                                 "~/.emacs.d/licenses/thales")
-                )
-(profile-set-default "others")
-(profile-load-path-alist)
+(server-start) ; start the server now, for use with emacsclient
 
 ;; do not display splash screen
-(setq inhibit-startup-message t)
+(setq inhibit-startup-screen t)
 
 ;; paste at point and not at cursor
 (setq mouse-yank-at-point t)
@@ -97,12 +36,11 @@
 (transient-mark-mode t)
 
 ;; Title on the frame to the name of the current buffer
-(setq frame-title-format "%b - Emacs")
-(setq frame-icon-format "%b - Emacs")
+(setq-default frame-title-format "%b - Emacs")
+(setq-default frame-icon-format "%b - Emacs")
 
 ;; Paren matching
 (show-paren-mode t)
-(setq show-paren-style "expression")
 
 ;; Disable forced trucation for side-by-side windows
 (setq truncate-partial-width-windows nil)
@@ -113,214 +51,125 @@
 ;; Mouse wheel support
 (mouse-wheel-mode 1)
 
-;; adios menubar
+;; bye bye menubar
 (menu-bar-mode -1)
 
 ;; I like abbrev
-(setq default-abbrev-mode t)
+(setq-default abbrev-mode t)
+(setq abbrev-file-name "~/.emacs.d/abbrev_defs")
 
-;; Stand alone configuration
-(set-foreground-color "wheat")
-(set-background-color "dark slate gray")
+;; Some other auto modes
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; more often C++...
+(add-to-list 'auto-mode-alist '("\\.l\\'" . c-mode) t)
+(add-to-list 'auto-mode-alist '("\\.l\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
+(add-to-list 'auto-mode-alist '("\\.y\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Colors
+
+;; Custom theme
+(set-foreground-color "gainsboro")
+(set-background-color "#393f43")
 (set-cursor-color "magenta")
 (set-mouse-color "white")
 (set-frame-font "DejaVu Sans Mono-9" t)
 
 ;; Frame-based (emacsclient) configuration
-(add-to-list 'default-frame-alist '(foreground-color . "wheat"))
+(add-to-list 'default-frame-alist '(foreground-color . "gainsboro"))
+(add-to-list 'default-frame-alist '(background-color . "#393f43"))
 (add-to-list 'default-frame-alist '(cursor-color . "magenta"))
 (add-to-list 'default-frame-alist '(mouse-color . "white"))
-(add-to-list 'default-frame-alist '(background-color . "dark slate gray"))
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-9"))
 
-;; Auto insertion on empty files
-(require 'file-template)
-(add-hook 'find-file-not-found-functions
-          'file-template-find-file-not-found-hook 'append)
-(setq file-template-insert-automatically t)
-(setq file-template-paths '("~/.emacs.d/templates/"))
-(setq file-template-search-current-dir nil)
-(setq file-template-mapping-alist
-      '(
-        ("AUTHORS" . "authors.tmpl")
-        ("\\.[Hh]\\'" . "cheader.tmpl")
-        ("\\.h\\(pp\\|xx\\|\\+\\+\\)\\'" . "cheader.tmpl")
-        ("\\.c\\'" . "cbody.tmpl")
-        ("\\.c\\(pp\\|xx\\|\\+\\+\\)\\'" . "cppbody.tmpl")
-        ("\\.C\\'" . "cppbody.tmpl")
-        ("\\.xsd\\'" . "xsd.tmpl")
-        ("\\.l\\'" . "lex.tmpl")
-        ("\\.ll\\'" . "lex.tmpl")
-        ("\\.l\\(pp\\|xx\\|\\+\\+\\)\\'" . "lex.tmpl")
-        ("\\.y\\'" . "yacc.tmpl")
-        ("\\.yy\\'" . "yacc.tmpl")
-        ("\\.y\\(pp\\|xx\\|\\+\\+\\)\\'" . "yacc.tmpl")
-        ))
-
-;; Some other auto modes
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; more often C++...
-(add-to-list 'auto-mode-alist '("README" . text-mode) t)
-(add-to-list 'auto-mode-alist '("NEWS" . text-mode) t)
-(add-to-list 'auto-mode-alist '("COPYING" . text-mode) t)
-(add-to-list 'auto-mode-alist '("\\.l\\'" . c-mode) t)
-(add-to-list 'auto-mode-alist '("\\.l\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
-(add-to-list 'auto-mode-alist '("\\.y\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
-(add-to-list 'auto-mode-alist '("\\.xsd\\'" . nxml-mode) t)
+;; Make whitespace more subtle
+(setq-default whitespace-style '(face tabs spaces trailing
+                                      space-before-tab newline indentation
+                                      space-after-tab space-mark tab-mark
+                                      newline-mark))
+(global-whitespace-mode t)
+(set-face-background 'whitespace-space nil)
+(set-face-foreground 'whitespace-space "gray43")
+(set-face-background 'whitespace-hspace nil)
+(set-face-foreground 'whitespace-hspace "gray43")
+(set-face-background 'whitespace-space-before-tab nil)
+(set-face-foreground 'whitespace-space-before-tab "gray43")
+(set-face-background 'whitespace-space-after-tab nil)
+(set-face-foreground 'whitespace-space-after-tab "gray43")
+(set-face-background 'whitespace-tab nil)
+(set-face-foreground 'whitespace-tab "gray43")
+(set-face-background 'whitespace-newline nil)
+(set-face-foreground 'whitespace-newline "gray43")
+(set-face-background 'whitespace-empty nil)
+(set-face-foreground 'whitespace-empty "gray43")
+(set-face-background 'whitespace-indentation nil)
+(set-face-foreground 'whitespace-indentation "gray43")
+(set-face-background 'whitespace-trailing nil)
+(set-face-foreground 'whitespace-trailing "red")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; SKELETONS & TEMPO
+;;; Package loading: FlyCheck, etc.
+
+(setq load-path
+      (cons "~/.emacs.d/lisp/" load-path))
+
+(require 'package)
+(add-to-list 'package-archives
+             '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
+
+;; Flycheck Installation - uncomment and execute only the following
+; (package-initialize)
+; (package-install 'flycheck)
+(add-hook 'after-init-hook
+        'global-flycheck-mode)
+
+(require 'fill-column-indicator)
+(setq fci-rule-color "gray")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Skeletons
 
 ;; Do not insert newline after skeleton insertation
-(setq skeleton-end-hook nil)
+(setq-default skeleton-end-hook nil)
 
-(define-skeleton my-no-self-insert
-  "No self insertion"
-  ""
-  >)
-(put 'my-no-self-insert 'no-self-insert t)
+;; Don't mix with abbrev
+(setq-default skeleton-further-elements '((abbrev-mode nil)))
 
 (define-skeleton my-skel-c-main
   "Insert a main, cool..."
-  ""
+  nil
   "int main (int argc, char **argv, char **env)" >
   "\n{" > "\n" > _ "\n}" > "\n")
-(put 'my-skel-c-main 'no-self-insert t)
 
 (define-skeleton my-skel-c-if
   "Insert parenthesis after C style \`if\' construct"
-  ""
-  "if (" _ ")" >)
-(put 'my-skel-c-if 'no-self-insert t)
+  nil "if (" _ ")" >)
 
 (define-skeleton my-skel-c-for
   "Insert parenthesis after C style \`for\' construct"
-  ""
-  "for (" _ ")" >)
-(put 'my-skel-c-for 'no-self-insert t)
+  nil "for (" _ ")" >)
 
 (define-skeleton my-skel-c-while
   "Insert parenthesis after C \`while\' construct"
-  "" "while (" _ ")" >)
-(put 'my-skel-c-while 'no-self-insert t)
+  nil "while (" _ ")" >)
 
 (define-skeleton my-skel-c-do-while
   "Insert a standard C style \`do while\' construct"
-  "" "do" >)
-(put 'my-skel-c-do-while 'no-self-insert t)
+  nil "do" > "\n{" > "\n" > _ "\n} while ();" >)
 
 (define-skeleton my-skel-c-else
   "Insert a standard C style \`else\' construct"
-  "" "else" >)
-(put 'my-skel-c-else 'no-self-insert t)
+  nil "else" >)
 
 (define-skeleton my-skel-c-else-if
   "Insert paranthesis in C \`else if\' construct"
-  "" "else if (" _ ")" >)
-(put 'my-skel-c-else-if 'no-self-insert t)
+  nil "else if (" _ ")" >)
 
 (define-skeleton my-skel-javadoc
   "Insert the brief and close the comment"
-  "" "*" > "\n*  " > _ "\n*/" >)
-(put 'my-skel-javadoc 'no-self-insert t)
-
-(require 'tempo-snippets)
-(define-key tempo-snippets-keymap [tab] 'tempo-snippets-next-field)
-(define-key tempo-snippets-keymap [backtab] 'tempo-snippets-previous-field)
-(define-key tempo-snippets-keymap "\r" 'tempo-snippets-clear-latest)
-(setq tempo-snippets-grow-in-front t)
-
-(defadvice tempo-define-template (after no-self-insert-in-abbrevs activate)
-  "Skip self-insert if template function is called by an abbrev."
-  (put (intern (concat "tempo-template-" (ad-get-arg 0))) 'no-self-insert t))
-
-(tempo-define-snippet "c-for-it"
-  '(> "for (" (p "Type: " type) "::iterator " (p "Iterator: " it) " = "
-      (p "Container: " container) ".begin();" n >
-      (s it) " != " (s container) ".end(); ++" (s it) ")" n "{" > n > n "}"
-      >))
-
-(tempo-define-snippet "c-unary-functor"
-  '(" /**" > n "*  @brief  Unary functor " > n "*/" > n
-    > "struct " (p "Name: " name) n "{" > n
-    > (p "Return: " return) n >
-    "operator() (const " (p "Type: " type) "& _p)" > n
-    "{" > n > n "}" > n "};" >))
-
-(tempo-define-snippet "c-binary-functor"
-  '(" /**" > n "*  @brief  Binary functor " > n "*/" > n
-    > "struct " (p "Name: " name) n "{" > n
-    > (p "Return: " return) n >
-    "operator() (const " (p "Type: " type) "& _a, const " (s type) "& _b)" > n
-    "{" > n > n "}" > n "};" >))
-
-(tempo-define-snippet "c-comparator"
-  '(" /**" > n "*  @brief  Comparison functor " > n "*/" > n
-    > "struct " (p "Name: " name) n "{" > n
-    "bool operator() (const " (p "Type: " type) "& _a, const "
-    (s type) "& _b)" > n "{" > n > n "}" > n "};" >))
-
-(tempo-define-snippet "c-get-set"
-  '(" /**" > n > "*  @name   " (p "Name: " name) > n
-    "*  @brief  Accessors for the attribute `_m_" (s name) "'." > n
-    "*  @see    _m_" (s name) > n "*/" > n " //@{" > n n " /**" > n
-    "*  @brief  Read-only (constant) accessor." > n
-    "*/" > n > "const " (p "Return: " ret) "& " (s name) " () const" > n
-    "{ return _m_" (s name) "; }" > n n " /**" > n
-    "*  @brief  Read/write accessor." > n "*/" > n > (s ret) "& " (s name)
-    " ()" > n "{ return _m_" (s name) "; }" > n n " //@}" >))
-
-(tempo-define-snippet "c-interface"
-  '(" /**" > n "*  @brief  Interface " > n
-    "*/" > n > "class " (p "Name: " name) n "{" > n "public:" > n
-    " /**" > n "*  @brief  " > n "*/" > n
-    "virtual " (p "Return: " ret) " " (p "Function: " fun) " (" p ") = 0;" > n n
-    " /**" > n "*  @brief  Virtual desctructor required for polymorphism." > n
-    "*/" > n "virtual ~" (s name) " ()" > n "{ }" > n "};" >))
-
-(tempo-define-snippet "c-class"
-  '(" /**" > n "*  @brief  Class " > n
-    "*/" > n > "class " (p "Name: " name) n "{" > n
-    "typedef " (s name) " self_type;" > n n "public:" > n
-    " /**" > n "*  @brief  Default constructor " > n "*/" > n
-    > (s name) " ()" > n "{" > n > n "}" > n
-    n " /**" > n "*  @brief  Copy constructor " > n "*/" > n
-    > (s name) " (const self_type& _s)" > n "{" > n > n "}" > n
-    n " /**" > n "*  @brief  Assignment operator " > n "*/" > n
-    "Self& operator= (const self_type& _s)" > n "{" >
-    n "if (&_s != this)" > n "{" > n > n "}" > n
-    "return *this;" > n "}" > n
-    n "private:" > n n "};" >))
-
-(tempo-define-snippet "c-noncopy-class"
-  '("#include <boost/utility.hpp>" > n n
-    " /**" > n "*  @brief  Class " > n
-    "*/" > n > "class " (p "Name: " name) n
-    ": boost::noncopyable" > n "{" > n "public:" > n " /**" > n
-    "*  @brief  Default constructor " > n "*/" > n
-    > (s name) " ()" > n "{" > n > n "}" > n
-    n "private:" > n n "};" >))
-
-(tempo-define-snippet "c-child-class"
-  '(" /**" > n "*  @brief  Class " > n
-    "*/" > n > "class " (p "Name: " name) n ":" >
-    "public " (p "Parent: " parent) n "{" > n
-    "typedef " (s name) " self_type;" > n
-    "typedef " (s parent) " base_type;" > n n "public:" > n
-    " /**" > n "*  @brief  Default constructor " > n "*/" > n
-    > (s name) " ()" > n > ": Base()" > n "{" > n > n "}" > n
-    n " /**" > n "*  @brief  Copy constructor " > n "*/" > n
-    > (s name) " (const self_type& _s)" > n > ": base_type()" > n "{" > n > n "}" > n
-    n " /**" > n "*  @brief  Assignment operator " > n "*/" > n
-    "Self& operator= (const self_type& _s)" > n "{" >
-    n "if (&_s != this)" > n "{" > n > n "}" > n
-    "return *this;" > n "}" > n
-    n "private:" > n n "};" >))
-
+  nil "*" > "\n*  " > _ "\n*/" >)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; UTILITIES
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; UTILITIES
 
 (defvar my-key-swapped-p nil
   "Tell whether or not I swapped my keyboard: t if I did, nil otherwise.")
@@ -342,15 +191,14 @@
     ))
 
 (defun my-insert-file-with-prefix (filename &optional prefix)
-  "Insert file FILENAME in the current buffer at point and fill
-every paragraph with `fill-paragraph'.
+  "Insert file FILENAME at point and fill every paragraph with `fill-paragraph'.
 
-Optional argument PREFIX must be a string or null. If null,
-prefix is set to the content of string that is starts at
-`point-at-bol' and finishes at `point'. After all occurrences of
-new line, the content of PREFIX is inserted. This operation takes
-place after insertion of the text and before calling
-`fill-paragraph'."
+  Optional argument PREFIX must be a string or null.  If null,
+  prefix is set to the content of string that is starts at
+  `point-at-bol' and finishes at `point'.  After all occurrences of
+  new line, the content of PREFIX is inserted.  This operation takes
+  place after insertion of the text and before calling
+  `fill-paragraph'."
   (interactive "fFile to insert: ")
   (unless (string-or-null-p prefix)
     (error "Argument prefix must be a string or null"))
@@ -408,8 +256,7 @@ place after insertion of the text and before calling
 (byte-compile 'my-coding-context-p)
 
 (defun my-javadoc-context-p ()
-  "Return true if we are in the comment context and the line starts with either
-  \"/**\" or \"*\"."
+  "Return true if point is in a javadoc context."
   (save-excursion
     (save-match-data
       (if (my-comment-context-p)
@@ -419,9 +266,7 @@ place after insertion of the text and before calling
 (byte-compile 'my-javadoc-context-p)
 
 (defun my-c-compactor ()
-  "Compact a multi-line sequence of characters starting by '{' and
-  finishing by '}' that is located around the point ('{' is searched
-  backward while '}' is searched forward)"
+  "Concatenate the sexp at point on a single line."
   (interactive)
   (save-excursion
     (save-match-data
@@ -451,8 +296,9 @@ place after insertion of the text and before calling
 (byte-compile 'my-c-compactor)
 
 (defun my-javadoc-return (javadoc-margin)
-  "Clear the blanks, insert new line and indent, insert '*', insert the
-javadoc-margin."
+  "Make a new javadoc line.
+
+JAVADOC-MARGIN   The beginning of the margin."
   (while (or (= (char-before) 32) (= (char-before) 9)) ; 32: space, 9: tab
     (delete-char -1))
   (newline-and-indent)
@@ -496,7 +342,7 @@ javadoc-margin."
 (byte-compile 'my-delete-indentation)
 
 (defun my-rename (OLD NEW)
-  "Rename a word by another word. Do not replace part of the word, replace either the all word or nothing."
+  "Rename a word by another word. Do not replace part of the word, replace either the whole word or nothing."
   (interactive "*srename: \nsrename %s by: \n")
   (save-excursion
     (save-restriction
@@ -515,7 +361,7 @@ javadoc-margin."
 (byte-compile 'my-rename)
 
 (defun my-file-untabify ()
-  "Change all tabs into spaces in a file"
+  "Change all tabs into spaces in a file."
   (interactive "*")
   (save-restriction
     (widen)
@@ -534,22 +380,22 @@ project, automatically building tags."
     (visit-tags-table tag-file)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; HOOKS SETTINGS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; HOOKS SETTINGS
+
 (add-hook 'text-mode-hook
           '(lambda ()
              (modify-syntax-entry ?_ "w")
              (auto-fill-mode 1)
              (setq fill-column 80)
+             (fci-mode)
              (define-mode-abbrev "emacs" "Emacs")
              ))
 
 (add-hook 'change-log-mode-hook
           '(lambda ()
-             (setq add-log-full-name (profile-current-name))
-             (setq add-log-mailing-address (profile-current-mailing-address))
              (auto-fill-mode 1)
-             (setq show-trailing-whitespace t)
+             (setq fill-column 80)
+             (fci-mode)
              (define-mode-abbrev "emacs" "Emacs")
              ))
 
@@ -576,7 +422,6 @@ project, automatically building tags."
              (local-set-key [?\C-x ?\C-.] 'find-file-at-point)
              (setq c-syntactic-indentation t)
              (c-toggle-hungry-state 1)
-;            (c-toggle-auto-newline 1) ; eventually decided to turn it off
              (c-toggle-electric-state 1)
              (local-set-key "*" '(lambda ()
                                    (interactive)
@@ -590,12 +435,12 @@ project, automatically building tags."
                                     (interactive)
                                     (if (my-javadoc-context-p)
                                         (my-javadoc-return 2) (newline))))
-             (c-set-style (profile-current-get 'coding-style))
+             (c-set-style "gnu")
              (setq indent-tabs-mode nil) ; non-nil tab, nil no-tabs
              (auto-fill-mode 1)
              (setq fill-column 80)
+             (fci-mode)
              (setq adaptive-fill-mode t)
-             (setq show-trailing-whitespace t)
              (setq skeleton-further-elements '((abbrev-mode nil)))
              (define-abbrev local-abbrev-table "main" "" 'my-skel-c-main)
              (define-abbrev local-abbrev-table "imain" "" 'my-skel-c-main)
@@ -609,46 +454,20 @@ project, automatically building tags."
              (message "C mode common hook end")
              ))
 
-(defun c-context-abbrev-expand-hook ()
-  "Swap abbrev tables according to context"
-  (if (looking-at "[ \t]*[\n\r]")
-      (setq local-abbrev-table c-mode-abbrev-advancement-table)
-    (if (my-string-context-p)
-        (setq local-abbrev-table nil)
-      (if (my-comment-context-p)
-          (setq local-abbrev-table my-javadoc-abbrev-table)
-        (setq local-abbrev-table c-mode-abbrev-table)))))
-
 (add-hook 'c-mode-hook
           '(lambda ()
              (message "C mode hook begin")
              ;; swappy abbrevs for comments and advancement :)
-;             (make-local-variable 'pre-abbrev-expand-hook)
-;             (add-hook 'pre-abbrev-expand-hook 'c-context-abbrev-expand-hook)
-             (define-abbrev-table 'c-mode-abbrev-advancement-table
-               '(
-                 ("for" "" my-skel-c-for)
-                 ("wihle" "" my-skel-c-while)
-                 ("whlie" "" my-skel-c-while)
-                 ("while" "" my-skel-c-while)
-                 ("if" "" my-skel-c-if)
-                 ("else" "" my-skel-c-else)
-                 ("elseif" "" my-skel-c-else-if)
-                 ("elsif" "" my-skel-c-else-if)
-                 ("elif" "" my-skel-c-else-if)
-                 ("do" "" my-skel-c-do-while)
-;                 ("#i" "#include")
-;                 ("#in" "#include")
-;                 ("#inc" "#include")
-;                 ("#if" "#ifndef")
-;                 ("#de" "#define")
-;                 ("#ifd" "#ifdef")
-;                 ("#e" "#endif")
-                 )
-               "The abbrev table for the C mode."
-;               :regexp "\\<\\(\\w+\\)\\W*"
-               '(:parents '(c-mode-abbrev-table)) ; inheritence property
-               )
+             (define-abbrev local-abbrev-table "for" "" 'my-skel-c-for)
+             (define-abbrev local-abbrev-table "wihle" "" 'my-skel-c-while)
+             (define-abbrev local-abbrev-table "whlie" "" 'my-skel-c-while)
+             (define-abbrev local-abbrev-table "while" "" 'my-skel-c-while)
+             (define-abbrev local-abbrev-table "if" "" 'my-skel-c-if)
+             (define-abbrev local-abbrev-table "else" "" 'my-skel-c-else)
+             (define-abbrev local-abbrev-table "elseif" "" 'my-skel-c-else-if)
+             (define-abbrev local-abbrev-table "elsif" "" 'my-skel-c-else-if)
+             (define-abbrev local-abbrev-table "elif" "" 'my-skel-c-else-if)
+             (define-abbrev local-abbrev-table "do" "" 'my-skel-c-do-while)
              (message "C mode hook end")
              ))
 
@@ -665,9 +484,7 @@ project, automatically building tags."
 (add-hook 'c++-mode-hook
           '(lambda ()
              (message "C++ mode hook begin")
-             ;; swappy abbrevs for comments and advancement :)
-;             (make-local-variable 'pre-abbrev-expand-hook)
-;             (add-hook 'pre-abbrev-expand-hook 'c++-context-abbrev-expand-hook)
+             ;; snappy abbrevs for comments and advancement :)
              (define-abbrev local-abbrev-table "std" "std:")
              (define-abbrev local-abbrev-table "sd" "std:")
              (define-abbrev local-abbrev-table "sdt" "std:")
@@ -702,60 +519,32 @@ project, automatically building tags."
              (define-abbrev local-abbrev-table "tl" "template")
              (define-abbrev local-abbrev-table "tn" "typename")
              (define-abbrev local-abbrev-table "tt" "template <typename")
-             (define-abbrev-table 'c++-mode-abbrev-advancement-table
-               '(
-                 ("for" "" my-skel-c-for)
-                 ("wihle" "" my-skel-c-while)
-                 ("whlie" "" my-skel-c-while)
-                 ("while" "" my-skel-c-while)
-                 ("if" "" my-skel-c-if)
-                 ("else" "" my-skel-c-else)
-                 ("elseif" "" my-skel-c-else-if)
-                 ("elsif" "" my-skel-c-else-if)
-                 ("elif" "" my-skel-c-else-if)
-                 ("do" "" my-skel-c-do-while)
-;                 ("#i" "#include")
-;                 ("#in" "#include")
-;                 ("#inc" "#include")
-;                 ("#if" "#ifndef")
-;                 ("#de" "#define")
-;                 ("#ifd" "#ifdef")
-;                 ("#e" "#endif")
-                 ("forit" "" tempo-template-c-for-it)
-                 ("fori" "" tempo-template-c-for-it)
-                 ("functor" "" tempo-template-c-unary-functor)
-                 ("bfunctor" "" tempo-template-c-binary-functor)
-                 ("binaryfunctor" "" tempo-template-c-binary-functor)
-                 ("comparator" "" tempo-template-c-comparator)
-                 ("interface" "" tempo-template-c-interface)
-                 ("cclass" "" tempo-template-c-class)
-                 ("nclass" "" tempo-template-c-noncopy-class)
-                 ("ncclass" "" tempo-template-c-noncopy-class)
-                 ("chclass" "" tempo-template-c-child-class)
-                 ("childc" "" tempo-template-c-child-class)
-                 ("childclass" "" tempo-template-c-child-class)
-                 ("getset" "" tempo-template-c-get-set)
-                 ("smap" "std::map<" my-no-self-insert)
-                 ("sset" "std::set<" my-no-self-insert)
-                 ("svec" "std::vector<" my-no-self-insert)
-                 ("svector" "std::vector<" my-no-self-insert)
-                 ("cc" "const_cast<" my-no-self-insert)
-                 ("sc" "static_cast<" my-no-self-insert)
-                 ("rc" "reinterpret_cast<" my-no-self-insert)
-                 )
-               "The abbrev table for the C++ mode."
-;               :regexp "\\<\\(\\w+\\)\\W*"
-               '(:parents '(c++-mode-abbrev-table)) ; inheritence property
-               )
+             (define-abbrev local-abbrev-table "for" "" 'my-skel-c-for)
+             (define-abbrev local-abbrev-table "wihle" "" 'my-skel-c-while)
+             (define-abbrev local-abbrev-table "whlie" "" 'my-skel-c-while)
+             (define-abbrev local-abbrev-table "while" "" 'my-skel-c-while)
+             (define-abbrev local-abbrev-table "if" "" 'my-skel-c-if)
+             (define-abbrev local-abbrev-table "else" "" 'my-skel-c-else)
+             (define-abbrev local-abbrev-table "elseif" "" 'my-skel-c-else-if)
+             (define-abbrev local-abbrev-table "elsif" "" 'my-skel-c-else-if)
+             (define-abbrev local-abbrev-table "elif" "" 'my-skel-c-else-if)
+             (define-abbrev local-abbrev-table "do" "" 'my-skel-c-do-while)
+             (define-abbrev local-abbrev-table "smap" "std::map<")
+             (define-abbrev local-abbrev-table "sset" "std::set<")
+             (define-abbrev local-abbrev-table "svec" "std::vector<")
+             (define-abbrev local-abbrev-table "svector" "std::vector<")
+             (define-abbrev local-abbrev-table "cc" "const_cast<")
+             (define-abbrev local-abbrev-table "sc" "static_cast<")
+             (define-abbrev local-abbrev-table "rc" "reinterpret_cast<")
              (message "C++ mode hook end")
              ))
 
 (add-hook 'php-mode-hook
           '(lambda ()
              (local-set-key "\r" 'newline-and-indent)
-             (setq show-trailing-whitespace t)
              (auto-fill-mode 1)
              (setq fill-column 80)
+             (fci-mode)
              (setq adaptive-fill-mode t)
              (setq indent-tabs-mode nil) ; spaces only
              (define-abbrev local-abbrev-table "f" "function")
@@ -767,10 +556,10 @@ project, automatically building tags."
   (local-set-key "\r" 'newline-and-indent)
   (modify-syntax-entry ?- "w")
   (modify-syntax-entry ?_ "w")
-  (setq show-trailing-whitespace t)
   (setq indent-tabs-mode nil) ; spaces only
   (auto-fill-mode 1)
   (setq fill-column 80)
+  (fci-mode)
   (setq adaptive-fill-mode t)
   (define-abbrev local-abbrev-table "d" "defun")
   (define-abbrev local-abbrev-table "f" "defun")
@@ -791,7 +580,6 @@ project, automatically building tags."
              (auto-fill-mode 1)
              (setq fill-column 80)
              (setq adaptive-fill-mode t)
-             (setq show-trailing-whitespace t)
              (define-abbrev local-abbrev-table "imain"
                "if __name__ == '__main__':\n    ")
              (define-abbrev local-abbrev-table "ret" "return")
@@ -815,12 +603,11 @@ project, automatically building tags."
              (auto-fill-mode 1)
              (setq fill-column 80)
              (setq adaptive-fill-mode t)
-             (setq show-trailing-whitespace t)
              ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; GLOBAL SET KEYS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (require 'pager)
 (global-set-key "\C-v"     'pager-page-down)
 (global-set-key [next]     'pager-page-down)
@@ -830,6 +617,7 @@ project, automatically building tags."
 (global-set-key '[M-kp-8]  'pager-row-up)
 (global-set-key '[M-down]  'pager-row-down)
 (global-set-key '[M-kp-2]  'pager-row-down)
+
 (global-set-key "\C-cr" 'my-rename)
 (global-set-key [?\C-c ?\r] 'delete-trailing-whitespace)
 (global-set-key "\M-g" 'goto-line) ; I don't use face selection
@@ -846,13 +634,11 @@ project, automatically building tags."
 (global-set-key [f9] 'my-swap-keyboard)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; EMACS SESSION
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; EMACS SESSION
 (desktop-save-mode 1)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; AUTO CORRECTION & OTHER GLOBAL ABBREVS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; AUTO CORRECTION & OTHER GLOBAL ABBREVS
 
 (define-abbrev-table 'global-abbrev-table '(
     ("abbout" "about" nil 0)
@@ -1792,24 +1578,25 @@ project, automatically building tags."
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; CUSTOMIZED COMMANDS BY EMACS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; CUSTOMIZED COMMANDS BY EMACS
+
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(auto-save-list-file-prefix "~/.emacs.files/auto-save-list/.saves-")
  '(backup-directory-alist (quote (("." . "~/.emacs.files/backup"))))
  '(column-number-mode t)
+ '(package-selected-packages (quote (flycheck)))
  '(save-abbrevs nil)
  '(tool-bar-mode nil nil (tool-bar)))
-(custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
- )
 (put 'scroll-left 'disabled nil)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
