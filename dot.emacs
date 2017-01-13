@@ -1,21 +1,37 @@
-; -*- Emacs-Lisp -*-
+;;; emacs --- Sylvain Bougerel Emacs' configuration
 
-;;; Code:
+;;; Commentary:
 
 ;;; COPYRIGHT
 ;;;
 ;;; This file and the files distributed along with this file are totally free of
 ;;; use if they are not protected by any copyright rules present in the content
-;;; of these files. You can modify, redistribute, copy part of this file or the
+;;; of these files.  You can modify, redistribute, copy part of this file or the
 ;;; files distributed along with this file without any restrictions if they are
 ;;; not protected by any copyright rules present in the content of these files.
 ;;;
 ;;; Sylvain Bougerel
 
+;;; Code:
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; GENERAL SETTINGS
 
-(server-start) ; start the server now, for use with emacsclient
+;; Added by Package.el.  This must come before configurations of installed
+;; packages.  Don't delete this line.  If you don't want it, just comment it out
+;; by adding a semicolon to the start of the line.  You may delete these
+;; explanatory comments.
+(package-initialize)
+(add-to-list 'package-archives
+             '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
+
+(require 'server)
+(unless (server-running-p)
+  (server-start)) ; start the server now, for use with emacsclient
+
+;; identification
+(setq user-full-name "Sylvain Bougerel")
+(setq user-mail-address "sylvain.bougerel@gmail.com")
 
 ;; do not display splash screen
 (setq inhibit-startup-screen t)
@@ -43,7 +59,8 @@
 (show-paren-mode t)
 
 ;; Disable forced trucation for side-by-side windows
-(setq truncate-partial-width-windows nil)
+(setq-default truncate-lines nil)
+(setq-default truncate-partial-width-windows nil)
 
 ;; Set visible bell on
 (setq visible-bell t)
@@ -64,69 +81,90 @@
 (add-to-list 'auto-mode-alist '("\\.l\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
 (add-to-list 'auto-mode-alist '("\\.y\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
 
+(add-hook 'find-file-hook 'auto-insert)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Colors
+;;; COLOR
+(require 'color)
 
 ;; Custom theme
 (set-foreground-color "gainsboro")
-(set-background-color "#393f43")
+(set-background-color "#33393d")
 (set-cursor-color "magenta")
 (set-mouse-color "white")
 (set-frame-font "DejaVu Sans Mono-9" t)
 
 ;; Frame-based (emacsclient) configuration
 (add-to-list 'default-frame-alist '(foreground-color . "gainsboro"))
-(add-to-list 'default-frame-alist '(background-color . "#393f43"))
+(add-to-list 'default-frame-alist '(background-color . "#33393d"))
 (add-to-list 'default-frame-alist '(cursor-color . "magenta"))
 (add-to-list 'default-frame-alist '(mouse-color . "white"))
-(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-9"))
+(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))
 
 ;; Make whitespace more subtle
-(setq-default whitespace-style '(face tabs spaces trailing
-                                      space-before-tab newline indentation
-                                      space-after-tab space-mark tab-mark
-                                      newline-mark))
-(global-whitespace-mode t)
-(set-face-background 'whitespace-space nil)
-(set-face-foreground 'whitespace-space "gray43")
-(set-face-background 'whitespace-hspace nil)
-(set-face-foreground 'whitespace-hspace "gray43")
-(set-face-background 'whitespace-space-before-tab nil)
-(set-face-foreground 'whitespace-space-before-tab "gray43")
-(set-face-background 'whitespace-space-after-tab nil)
-(set-face-foreground 'whitespace-space-after-tab "gray43")
-(set-face-background 'whitespace-tab nil)
-(set-face-foreground 'whitespace-tab "gray43")
-(set-face-background 'whitespace-newline nil)
-(set-face-foreground 'whitespace-newline "gray43")
-(set-face-background 'whitespace-empty nil)
-(set-face-foreground 'whitespace-empty "gray43")
-(set-face-background 'whitespace-indentation nil)
-(set-face-foreground 'whitespace-indentation "gray43")
-(set-face-background 'whitespace-trailing nil)
-(set-face-foreground 'whitespace-trailing "red")
+(with-eval-after-load 'whitespace
+  (setq-default whitespace-style '(face tabs spaces trailing
+                                        space-before-tab indentation
+                                        space-after-tab space-mark tab-mark))
+  (set-face-background 'whitespace-space nil)
+  (set-face-foreground 'whitespace-space "gray43")
+  (set-face-background 'whitespace-hspace nil)
+  (set-face-foreground 'whitespace-hspace "gray43")
+  (set-face-background 'whitespace-space-before-tab nil)
+  (set-face-foreground 'whitespace-space-before-tab "gray43")
+  (set-face-background 'whitespace-space-after-tab nil)
+  (set-face-foreground 'whitespace-space-after-tab "gray43")
+  (set-face-background 'whitespace-tab nil)
+  (set-face-foreground 'whitespace-tab "gray43")
+  (set-face-background 'whitespace-newline nil)
+  (set-face-foreground 'whitespace-newline "gray43")
+  (set-face-background 'whitespace-empty nil)
+  (set-face-foreground 'whitespace-empty "gray43")
+  (set-face-background 'whitespace-indentation nil)
+  (set-face-foreground 'whitespace-indentation "gray43")
+  (set-face-background 'whitespace-trailing nil)
+  (set-face-foreground 'whitespace-trailing "red"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Package loading: FlyCheck, etc.
+;;; Package loading: FlyCheck, Company
 
 (setq load-path
       (cons "~/.emacs.d/lisp/" load-path))
 
-(require 'package)
-(add-to-list 'package-archives
-             '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
+(add-hook 'after-init-hook '(lambda ()
+                              (require 'fill-column-indicator)
+                              (setq fci-rule-color "gray")))
 
-;; Flycheck Installation - uncomment and execute only the following
-; (package-initialize)
-; (package-install 'flycheck)
-(add-hook 'after-init-hook
-        'global-flycheck-mode)
+(add-hook 'after-init-hook 'global-flycheck-mode)
 
-(require 'fill-column-indicator)
-(setq fci-rule-color "gray")
+(defvar my-show-company-overlay-hook nil
+  "A hook that is called before company overlay is shown.")
+(defvar my-hide-company-overlay-hook nil
+  "A hook that is called before company overlay is hidden.")
+
+(add-hook 'after-init-hook 'global-company-mode)
+(with-eval-after-load 'company
+  (defun my-company-call-frontends-before (command)
+    (when (string= "show" command)
+      (run-hooks 'my-show-company-overlay-hook))
+    (when (string= "hide" command)
+      (run-hooks 'my-hide-company-overlay-hook)))
+  (advice-add 'company-call-frontends :before
+              #'my-company-call-frontends-before)
+  (let ((bg (face-attribute 'default :background))
+        (fg (face-attribute 'default :foreground)))
+    (set-face-attribute 'company-tooltip nil
+                        :inherit 'default :foreground bg :background fg)
+    (set-face-attribute 'company-scrollbar-bg nil
+                        :background (color-darken-name fg 20))
+    (set-face-attribute 'company-scrollbar-fg nil
+                        :background (color-darken-name fg 40))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Skeletons
+;;; Skeletons & Abbrevs
+
+(require 'tempo)
+(setq tempo-interactive t)
 
 ;; Do not insert newline after skeleton insertation
 (setq-default skeleton-end-hook nil)
@@ -156,17 +194,134 @@
   "Insert a standard C style \`do while\' construct"
   nil "do" > "\n{" > "\n" > _ "\n} while ();" >)
 
-(define-skeleton my-skel-c-else
-  "Insert a standard C style \`else\' construct"
-  nil "else" >)
-
 (define-skeleton my-skel-c-else-if
   "Insert paranthesis in C \`else if\' construct"
   nil "else if (" _ ")" >)
 
+(define-abbrev-table 'my-c-abbrev-table
+  '(("imain" "" my-skel-c-main)
+    ("main" "" my-skel-c-main)
+    ("imain" "" my-skel-c-main)
+    ("intmain" "" my-skel-c-main)
+    ("td" "typedef")
+    ("ret" "return")
+    ("rt" "return")
+    ("vd" "void")
+    ("for" "" my-skel-c-for)
+    ("wihle" "" my-skel-c-while)
+    ("whlie" "" my-skel-c-while)
+    ("while" "" my-skel-c-while)
+    ("if" "" my-skel-c-if)
+    ("elseif" "" my-skel-c-else-if)
+    ("elsif" "" my-skel-c-else-if)
+    ("elif" "" my-skel-c-else-if)
+    ("do" "" my-skel-c-do-while))
+  )
+
+(define-skeleton my-skel-c++-template-typename
+  "Inserts template<typename >"
+  nil "template<typename " _ ">" >)
+
+(define-skeleton my-skel-c++-template-class
+  "Inserts template<typename >"
+  nil "template<class " _ ">" >)
+
+(define-skeleton my-skel-c++-std-map
+  "Inserts std::map<>" nil "std::map<" _ ">" >)
+
+(tempo-define-template "forit"
+  '(> "for (" (p "Type: " type) "::iterator " (p "Iterator: " it) " = "
+      (p "Container: " container) ".begin();" n >
+      (s it) " != " (s container) ".end(); ++" (s it) ")" n "{" > n > n "}"
+      >))
+
+(defvar my-c++-abbrev-table (copy-abbrev-table my-c-abbrev-table))
+(define-abbrev-table 'my-c++-abbrev-table
+  '(("forit" "" tempo-template-forit)
+    ("std" "std:")
+    ("sd" "std:")
+    ("sdt" "std:")
+    ("thi" "this")
+    ("thsi" "this")
+    ("usname" "using namespace")
+    ("usn" "using namespace")
+    ("uns" "using namespace")
+    ("namesp" "namespace")
+    ("nsp" "namespace")
+    ("co" "cout <<")
+    ("ci" "cin >>")
+    ("ce" "cerr >>")
+    ("sc" "std::cout <<")
+    ("sco" "std::cout <<")
+    ("sout" "std::cout <<")
+    ("scout" "std::cout <<")
+    ("si" "std::cin >>")
+    ("sci" "std::cin >>")
+    ("scin" "std::cin >>")
+    ("se" "std::cerr <<")
+    ("sce" "std::cerr <<")
+    ("serr" "std::cerr <<")
+    ("scerr" "std::cerr <<")
+    ("sendl" "std::endl")
+    ("sflush" "std::flush")
+    ("sstr" "std::string")
+    ("sstring" "std::string")
+    ("ir" "iterator")
+    ("cir" "const_iterator")
+    ("tl" "template")
+    ("tn" "typename")
+    ("tt" "" my-skel-c++-template-typename)
+    ("tc" "" my-skel-c++-template-class)
+    ("smap" "" my-skel-c++-std-map)
+    ("sset" "std::set<")
+    ("svec" "std::vector<")
+    ("svector" "std::vector<")
+    ("cc" "const_cast<")
+    ("sc" "static_cast<")
+    ("rc" "reinterpret_cast<"))
+  )
+
 (define-skeleton my-skel-javadoc
   "Insert the brief and close the comment"
   nil "*" > "\n*  " > _ "\n*/" >)
+
+(define-skeleton my-skel-qtdoc
+  "Insert the brief and close the comment"
+  nil "!" > "\n*  " > _ "\n*/" >)
+
+(define-abbrev-table 'my-javadoc-abbrev-table
+  '(("@b" "@brief")
+    ("@p" "@param")
+    ("@r" "@return")
+    ("@s" "@see")
+    ("@a" "@author")
+    ("@e" "@enum"))
+  )
+
+(define-abbrev-table 'my-php-abbrev-table
+  '(("f" "function")
+    ("func" "function")
+    ("fc" "function"))
+  )
+
+(define-abbrev-table 'my-lisp-abbrev-table
+  '(( "d" "defun")
+    ( "f" "defun")
+    ( "lbd" "lambda")
+    ( "lamba" "lambda")
+    ( "lamda" "lambda")
+    ( "lamdba" "lambda"))
+  )
+
+(defun my-select-on-context (COMMENT STRING OTHER)
+  "Return COMMENT, STRING or CODE based on the current context.
+If point is in a comment, returns COMMENT.
+If point is in a string, return STRING.
+Otherwise, returns OTHER."
+  (let ((P (syntax-ppss))) (if (nth 4 P) COMMENT
+                             (if (nth 3 P) STRING
+                               OTHER))))
+(byte-compile 'my-select-on-context)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; UTILITIES
@@ -229,41 +384,11 @@
   (unless (= (point) (line-end-position)) (backward-char)))
 (byte-compile 'my-prev-eol)
 
-(defun my-comment-context-p ()
-  "Return true if we are in a comment context."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (nth 4 (parse-partial-sexp (point-min) (point))))))
-(byte-compile 'my-comment-context-p)
-
-(defun my-string-context-p ()
-  "Return true if we are in a string context."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (nth 3 (parse-partial-sexp (point-min) (point))))))
-(byte-compile 'my-string-context-p)
-
 (defun my-coding-context-p ()
-  "Return true if we are in a coding context."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (let ((P (parse-partial-sexp (point-min) (point))))
-        (and (null (nth 3 P))
-             (null (nth 4 P)))))))
+  "Return non-nil if point is not within a string or a comment."
+  (let ((P (syntax-ppss)))
+    (null (or (nth 3 P) (nth 4 P)))))
 (byte-compile 'my-coding-context-p)
-
-(defun my-javadoc-context-p ()
-  "Return true if point is in a javadoc context."
-  (save-excursion
-    (save-match-data
-      (if (my-comment-context-p)
-          (progn
-            (beginning-of-line)
-            (looking-at "[ \t]*\\(\\*\\)\\|\\(/\\*\\*\\)"))))))
-(byte-compile 'my-javadoc-context-p)
 
 (defun my-c-compactor ()
   "Concatenate the sexp at point on a single line."
@@ -295,54 +420,25 @@
                 (replace-match " ")))))))))
 (byte-compile 'my-c-compactor)
 
-(defun my-javadoc-return (javadoc-margin)
-  "Make a new javadoc line.
-
-JAVADOC-MARGIN   The beginning of the margin."
-  (while (or (= (char-before) 32) (= (char-before) 9)) ; 32: space, 9: tab
-    (delete-char -1))
-  (newline-and-indent)
-  (insert (apply 'concat "*" (make-list javadoc-margin " ")))
-  )
-(byte-compile 'my-javadoc-return)
-
-(defun my-at (pattern thenaction &optional elseaction)
-  "Look if the previous characters match pattern, execute thenaction if pattern
-  if found, or optional elseaction otherwise."
-  (let ((OK nil))
-    (save-excursion
-      (backward-char (length pattern))
-      (setq pattern (append pattern nil))
-      (while (and pattern (< (point) (point-max)) (= (car pattern) (char-after)))
-        (forward-char)
-        (setq pattern (cdr pattern)))
-      (if (null pattern) (setq OK t)
-        (forward-char (length pattern))))
-    (if OK (funcall thenaction)
-      (if elseaction (funcall elseaction)))))
+(defun my-at (pattern)
+  "If string before point match PATTERN, return t, else nil."
+  (string-equal pattern (buffer-substring-no-properties
+                         (if (< (point) (length pattern)) 0
+                           (- (point) (length pattern)))
+                         (point))))
 (byte-compile 'my-at)
 
 (defun my-delete-indentation ()
-  "Delete all the white space at the beginning of the line. And leave the cursor
-  where it supposed to be in the text."
-  (interactive "*")
-  (let ((POS (point))
-        (DIFFTXT 0)
-        (COLS 0))
+  "Delete all the white space at the beginning of the line."
+  (interactive)
+  (save-excursion
     (back-to-indentation)
-    (setq DIFFTXT (- POS (point)))
-    (setq POS (point))
-    (setq COLS (current-column))
-    (beginning-of-line)
-    (delete-char (- POS (point)))
-    ;; normalize with column
-    (indent-to (* (/ (1- COLS) tab-width) tab-width))
-    (if (> DIFFTXT 0) (forward-char DIFFTXT))
-    ))
+    (delete-char (- (point-at-bol) (point)))))
 (byte-compile 'my-delete-indentation)
 
 (defun my-rename (OLD NEW)
-  "Rename a word by another word. Do not replace part of the word, replace either the whole word or nothing."
+  "Rename the word OLD by the word NEW.
+Do not replace part of the word, replace either the whole word or nothing."
   (interactive "*srename: \nsrename %s by: \n")
   (save-excursion
     (save-restriction
@@ -370,8 +466,8 @@ JAVADOC-MARGIN   The beginning of the margin."
 (byte-compile 'my-file-untabify)
 
 (defadvice find-tag (before c-tag-file activate)
-  "Automatically visit tags file when finding tags, and if in a GNU/Automake
-project, automatically building tags."
+  "Automatically visit tags file when finding tags.
+If in a GNU/Automake project, automatically build tags."
   (let ((tag-file (concat default-directory "TAGS")))
     (unless (and (file-exists-p tag-file)
                  (file-exists-p (concat default-directory "Makefile.in"))
@@ -384,159 +480,89 @@ project, automatically building tags."
 
 (add-hook 'text-mode-hook
           '(lambda ()
+             (flycheck-mode -1)
+             (company-mode -1)
              (modify-syntax-entry ?_ "w")
              (auto-fill-mode 1)
              (setq fill-column 80)
-             (fci-mode)
-             (define-mode-abbrev "emacs" "Emacs")
+             (setq adaptive-fill-mode t)
+             (fci-mode 1)
+             (whitespace-mode 1)
              ))
 
 (add-hook 'change-log-mode-hook
           '(lambda ()
+             (flycheck-mode -1)
+             (company-mode -1)
              (auto-fill-mode 1)
              (setq fill-column 80)
-             (fci-mode)
-             (define-mode-abbrev "emacs" "Emacs")
+             (setq adaptive-fill-mode t)
+             (fci-mode 1)
+             (whitespace-mode 1)
              ))
-
-(define-abbrev-table 'my-javadoc-abbrev-table
-  '(
-;    ("@br" "@brief")
-;    ("@au" "@author")
-;    ("@pa" "@param")
-;    ("@re" "@return")
-;    ("@s" "@see")
-;    ("@se" "@see")
-;    ("@au" "@author")
-;    ("@en" "@enum")
-    ("emacs" "Emacs")
-    )
-  "The abbrev for java docs"
-;  :regexp "\\<\\(\\w+\\)\\W"
-  )
 
 (add-hook 'c-mode-common-hook
           '(lambda ()
-             (message "C mode common hook begin")
              (modify-syntax-entry ?_ "w")
+             (modify-syntax-entry ?@ "w")
              (local-set-key [?\C-x ?\C-.] 'find-file-at-point)
              (setq c-syntactic-indentation t)
              (c-toggle-hungry-state 1)
              (c-toggle-electric-state 1)
              (local-set-key "*" '(lambda ()
                                    (interactive)
-                                   (my-at "/*" 'my-skel-javadoc
-                                          '(lambda () (c-electric-star nil)))))
+                                   (if (my-at "/*") (my-skel-javadoc)
+                                     (c-electric-star nil))))
              (local-set-key "!" '(lambda ()
                                    (interactive)
-                                   (my-at "/*" 'my-skel-javadoc
-                                          '(lambda () (self-insert-command 1)))))
+                                   (if (my-at "/*") (my-skel-qtdoc)
+                                     (self-insert-command 1))))
              (local-set-key "\r" '(lambda ()
                                     (interactive)
-                                    (if (my-javadoc-context-p)
-                                        (my-javadoc-return 2) (newline))))
+                                    (if (nth 4 (syntax-ppss))
+                                        (let ((S (fill-context-prefix
+                                                  (point-at-bol) (point))))
+                                          (newline) (insert S))
+                                      (newline-and-indent))))
              (c-set-style "gnu")
              (setq indent-tabs-mode nil) ; non-nil tab, nil no-tabs
              (auto-fill-mode 1)
              (setq fill-column 80)
-             (fci-mode)
              (setq adaptive-fill-mode t)
-             (setq skeleton-further-elements '((abbrev-mode nil)))
-             (define-abbrev local-abbrev-table "main" "" 'my-skel-c-main)
-             (define-abbrev local-abbrev-table "imain" "" 'my-skel-c-main)
-             (define-abbrev local-abbrev-table "intmain" "" 'my-skel-c-main)
-             (define-abbrev local-abbrev-table "td" "typedef")
-             (define-abbrev local-abbrev-table "ret" "return")
-             (define-abbrev local-abbrev-table "rt" "return")
-             (define-abbrev local-abbrev-table "vd" "void")
+             (fci-mode 1)
+             (whitespace-mode 1)
+             (add-hook 'my-show-company-overlay-hook
+                       '(lambda() (turn-off-fci-mode)
+                          (whitespace-mode -1))
+                       nil t)
+             (add-hook 'my-hide-company-overlay-hook
+                       '(lambda() (turn-on-fci-mode)
+                          (whitespace-mode 1))
+                       nil t)
              (add-hook 'before-save-hook 'delete-trailing-whitespace)
              (add-hook 'before-save-hook 'my-file-untabify)
-             (message "C mode common hook end")
              ))
 
 (add-hook 'c-mode-hook
           '(lambda ()
-             (message "C mode hook begin")
-             ;; swappy abbrevs for comments and advancement :)
-             (define-abbrev local-abbrev-table "for" "" 'my-skel-c-for)
-             (define-abbrev local-abbrev-table "wihle" "" 'my-skel-c-while)
-             (define-abbrev local-abbrev-table "whlie" "" 'my-skel-c-while)
-             (define-abbrev local-abbrev-table "while" "" 'my-skel-c-while)
-             (define-abbrev local-abbrev-table "if" "" 'my-skel-c-if)
-             (define-abbrev local-abbrev-table "else" "" 'my-skel-c-else)
-             (define-abbrev local-abbrev-table "elseif" "" 'my-skel-c-else-if)
-             (define-abbrev local-abbrev-table "elsif" "" 'my-skel-c-else-if)
-             (define-abbrev local-abbrev-table "elif" "" 'my-skel-c-else-if)
-             (define-abbrev local-abbrev-table "do" "" 'my-skel-c-do-while)
-             (message "C mode hook end")
+             (add-function
+              :around (local 'abbrev-expand-function)
+              '(lambda (expand) (let ((local-abbrev-table
+                                       (my-select-on-context
+                                        my-javadoc-abbrev-table nil
+                                        my-c-abbrev-table)))
+                                  (funcall expand))))
              ))
-
-(defun c++-context-abbrev-expand-hook ()
-  "Swap abbrev tables according to context"
-  (if (looking-at "[ \t]*[\n\r]")
-      (setq local-abbrev-table c++-mode-abbrev-advancement-table)
-    (if (my-string-context-p)
-        (setq local-abbrev-table nil)
-      (if (my-comment-context-p)
-          (setq local-abbrev-table my-javadoc-abbrev-table)
-        (setq local-abbrev-table c++-mode-abbrev-table)))))
 
 (add-hook 'c++-mode-hook
           '(lambda ()
-             (message "C++ mode hook begin")
-             ;; snappy abbrevs for comments and advancement :)
-             (define-abbrev local-abbrev-table "std" "std:")
-             (define-abbrev local-abbrev-table "sd" "std:")
-             (define-abbrev local-abbrev-table "sdt" "std:")
-             (define-abbrev local-abbrev-table "thi" "this")
-             (define-abbrev local-abbrev-table "thsi" "this")
-             (define-abbrev local-abbrev-table "usname" "using namespace")
-             (define-abbrev local-abbrev-table "usn" "using namespace")
-             (define-abbrev local-abbrev-table "uns" "using namespace")
-             (define-abbrev local-abbrev-table "namesp" "namespace")
-             (define-abbrev local-abbrev-table "nsp" "namespace")
-             (define-abbrev local-abbrev-table "co" "cout <<")
-             (define-abbrev local-abbrev-table "ci" "cin >>")
-             (define-abbrev local-abbrev-table "ce" "cerr >>")
-             (define-abbrev local-abbrev-table "sc" "std::cout <<")
-             (define-abbrev local-abbrev-table "sco" "std::cout <<")
-             (define-abbrev local-abbrev-table "sout" "std::cout <<")
-             (define-abbrev local-abbrev-table "scout" "std::cout <<")
-             (define-abbrev local-abbrev-table "si" "std::cin >>")
-             (define-abbrev local-abbrev-table "sci" "std::cin >>")
-             (define-abbrev local-abbrev-table "scin" "std::cin >>")
-             (define-abbrev local-abbrev-table "se" "std::cerr <<")
-             (define-abbrev local-abbrev-table "sce" "std::cerr <<")
-             (define-abbrev local-abbrev-table "serr" "std::cerr <<")
-             (define-abbrev local-abbrev-table "scerr" "std::cerr <<")
-             (define-abbrev local-abbrev-table "sendl" "std::endl")
-             (define-abbrev local-abbrev-table "sflush" "std::flush")
-             (define-abbrev local-abbrev-table "sstr" "std::string")
-             (define-abbrev local-abbrev-table "sstring" "std::string")
-             (define-abbrev local-abbrev-table "ir" "iterator")
-             (define-abbrev local-abbrev-table "cir" "const_iterator")
-             (define-abbrev local-abbrev-table "te" "template")
-             (define-abbrev local-abbrev-table "tl" "template")
-             (define-abbrev local-abbrev-table "tn" "typename")
-             (define-abbrev local-abbrev-table "tt" "template <typename")
-             (define-abbrev local-abbrev-table "for" "" 'my-skel-c-for)
-             (define-abbrev local-abbrev-table "wihle" "" 'my-skel-c-while)
-             (define-abbrev local-abbrev-table "whlie" "" 'my-skel-c-while)
-             (define-abbrev local-abbrev-table "while" "" 'my-skel-c-while)
-             (define-abbrev local-abbrev-table "if" "" 'my-skel-c-if)
-             (define-abbrev local-abbrev-table "else" "" 'my-skel-c-else)
-             (define-abbrev local-abbrev-table "elseif" "" 'my-skel-c-else-if)
-             (define-abbrev local-abbrev-table "elsif" "" 'my-skel-c-else-if)
-             (define-abbrev local-abbrev-table "elif" "" 'my-skel-c-else-if)
-             (define-abbrev local-abbrev-table "do" "" 'my-skel-c-do-while)
-             (define-abbrev local-abbrev-table "smap" "std::map<")
-             (define-abbrev local-abbrev-table "sset" "std::set<")
-             (define-abbrev local-abbrev-table "svec" "std::vector<")
-             (define-abbrev local-abbrev-table "svector" "std::vector<")
-             (define-abbrev local-abbrev-table "cc" "const_cast<")
-             (define-abbrev local-abbrev-table "sc" "static_cast<")
-             (define-abbrev local-abbrev-table "rc" "reinterpret_cast<")
-             (message "C++ mode hook end")
+             (add-function
+              :around (local 'abbrev-expand-function)
+              '(lambda (expand) (let ((local-abbrev-table
+                                       (my-select-on-context
+                                        my-javadoc-abbrev-table
+                                        nil my-c++-abbrev-table)))
+                                  (funcall expand))))
              ))
 
 (add-hook 'php-mode-hook
@@ -544,42 +570,65 @@ project, automatically building tags."
              (local-set-key "\r" 'newline-and-indent)
              (auto-fill-mode 1)
              (setq fill-column 80)
-             (fci-mode)
              (setq adaptive-fill-mode t)
              (setq indent-tabs-mode nil) ; spaces only
-             (define-abbrev local-abbrev-table "f" "function")
-             (define-abbrev local-abbrev-table "func" "function")
-             (define-abbrev local-abbrev-table "fc" "function")
+             (fci-mode 1)
+             (whitespace-mode 1)
+             (add-hook 'my-show-company-overlay-hook
+                       '(lambda() (turn-off-fci-mode)
+                          (whitespace-mode -1))
+                       nil t)
+             (add-hook 'my-hide-company-overlay-hook
+                       '(lambda() (turn-on-fci-mode)
+                          (whitespace-mode 1))
+                       nil t)
+             (add-function
+              :around (local 'abbrev-expand-function)
+              '(lambda (expand) (let ((local-abbrev-table
+                                       (my-select-on-context
+                                        nil nil my-php-abbrev-table)))
+                                  (funcall expand))))
              ))
 
-(defun my-lisp-hook ()
+(defun my-lisp-settings ()
+  "Settings for Lisp and Emacs-Lisp."
   (local-set-key "\r" 'newline-and-indent)
   (modify-syntax-entry ?- "w")
   (modify-syntax-entry ?_ "w")
   (setq indent-tabs-mode nil) ; spaces only
   (auto-fill-mode 1)
   (setq fill-column 80)
-  (fci-mode)
   (setq adaptive-fill-mode t)
-  (define-abbrev local-abbrev-table "d" "defun")
-  (define-abbrev local-abbrev-table "f" "defun")
-  (define-abbrev local-abbrev-table "lbd" "lambda")
-  (define-abbrev local-abbrev-table "lamba" "lambda")
-  (define-abbrev local-abbrev-table "lamda" "lambda")
-  (define-abbrev local-abbrev-table "lamdba" "lambda")
+  (fci-mode 1)
+  (whitespace-mode 1)
+  (add-hook 'my-show-company-overlay-hook
+            '(lambda() (turn-off-fci-mode)
+               (whitespace-mode -1))
+            nil t)
+  (add-hook 'my-hide-company-overlay-hook
+            '(lambda() (turn-on-fci-mode)
+               (whitespace-mode 1))
+            nil t)
+  (add-function
+   :around (local 'abbrev-expand-function)
+   '(lambda (expand) (let ((local-abbrev-table
+                            (my-select-on-context
+                             nil nil my-lisp-abbrev-table)))
+                       (funcall expand))))
   )
-(byte-compile 'my-lisp-hook)
-
-(add-hook 'lisp-mode-hook 'my-lisp-hook)
-(add-hook 'emacs-lisp-mode-hook 'my-lisp-hook)
+(add-hook 'lisp-mode-hook 'my-lisp-settings)
+(add-hook 'emacs-lisp-mode-hook 'my-lisp-settings)
 
 (add-hook 'python-mode-hook
           '(lambda ()
              (local-set-key "\r" 'newline-and-indent)
              (modify-syntax-entry ?_ "w")
+             (setq indent-tabs-mode nil) ; spaces only
              (auto-fill-mode 1)
              (setq fill-column 80)
              (setq adaptive-fill-mode t)
+             (fci-mode 1)
+             (whitespace-mode 1)
              (define-abbrev local-abbrev-table "imain"
                "if __name__ == '__main__':\n    ")
              (define-abbrev local-abbrev-table "ret" "return")
@@ -593,6 +642,14 @@ project, automatically building tags."
              (define-abbrev local-abbrev-table "lamdba" "lambda")
              (define-abbrev local-abbrev-table "true" "True")
              (define-abbrev local-abbrev-table "false" "False")
+             (add-hook 'my-show-company-overlay-hook
+                       '(lambda() (turn-off-fci-mode)
+                          (whitespace-mode -1))
+                       nil t)
+             (add-hook 'my-hide-company-overlay-hook
+                       '(lambda() (turn-on-fci-mode)
+                          (whitespace-mode 1))
+                       nil t)
              ))
 
 (add-hook 'sgml-mode-hook
@@ -603,6 +660,15 @@ project, automatically building tags."
              (auto-fill-mode 1)
              (setq fill-column 80)
              (setq adaptive-fill-mode t)
+             (whitespace-mode 1)
+             (add-hook 'my-show-company-overlay-hook
+                       '(lambda()
+                          (whitespace-mode -1))
+                       nil t)
+             (add-hook 'my-hide-company-overlay-hook
+                       '(lambda()
+                          (whitespace-mode 1))
+                       nil t)
              ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -983,6 +1049,7 @@ project, automatically building tags."
     ("excitment" "excitement" nil 0)
     ("exhcange" "exchange" nil 0)
     ("exhcanges" "exchanges" nil 0)
+    ("expend" "expand" nil 0)
     ("experiance" "experience" nil 0)
     ("experienc" "experience" nil 0)
     ("exprience" "experience" nil 0)
@@ -1582,21 +1649,25 @@ project, automatically building tags."
 
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
+(put 'scroll-left 'disabled nil)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-insert-directory "~/.emacs.d/templates")
  '(auto-save-list-file-prefix "~/.emacs.files/auto-save-list/.saves-")
  '(backup-directory-alist (quote (("." . "~/.emacs.files/backup"))))
  '(column-number-mode t)
- '(package-selected-packages (quote (flycheck)))
+ '(package-selected-packages (quote (fill-column-indicator company flycheck)))
  '(save-abbrevs nil)
  '(tool-bar-mode nil nil (tool-bar)))
-(put 'scroll-left 'disabled nil)
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(font-lock-keyword-face ((t (:foreground "Cyan1" :weight bold))))
+ '(font-lock-string-face ((t (:foreground "RosyBrown2")))))
