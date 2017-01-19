@@ -602,6 +602,8 @@ If in a GNU/Automake project, automatically build tags."
                                        (my-select-on-context
                                         nil nil my-php-abbrev-table)))
                                   (funcall expand))))
+             (add-hook 'before-save-hook 'delete-trailing-whitespace)
+             (add-hook 'before-save-hook 'my-file-untabify)
              ))
 
 (defun my-lisp-settings ()
@@ -629,6 +631,8 @@ If in a GNU/Automake project, automatically build tags."
                             (my-select-on-context
                              nil nil my-lisp-abbrev-table)))
                        (funcall expand))))
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+  (add-hook 'before-save-hook 'my-file-untabify)
   )
 (add-hook 'lisp-mode-hook 'my-lisp-settings)
 (add-hook 'emacs-lisp-mode-hook 'my-lisp-settings)
@@ -656,6 +660,7 @@ If in a GNU/Automake project, automatically build tags."
                        '(lambda() (turn-on-fci-mode)
                           (whitespace-mode 1))
                        nil t)
+             (add-hook 'before-save-hook 'delete-trailing-whitespace)
              ))
 
 (add-hook 'sgml-mode-hook
@@ -675,6 +680,8 @@ If in a GNU/Automake project, automatically build tags."
                        '(lambda()
                           (whitespace-mode 1))
                        nil t)
+             (add-hook 'before-save-hook 'my-file-untabify)
+             (add-hook 'before-save-hook 'delete-trailing-whitespace)
              ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1669,8 +1676,7 @@ If in a GNU/Automake project, automatically build tags."
  '(package-selected-packages (quote (fill-column-indicator company flycheck)))
  '(safe-local-variable-values
    (quote
-    ((flycheck-clang-language-standard . "c++11")
-     (flycheck-clang-language-standard . c++11))))
+    ((flycheck-clang-language-standard . "c++11"))))
  '(save-abbrevs nil)
  '(tool-bar-mode nil nil (tool-bar)))
 
@@ -1681,3 +1687,4 @@ If in a GNU/Automake project, automatically build tags."
  ;; If there is more than one, they won't work right.
  '(font-lock-keyword-face ((t (:foreground "Cyan1" :weight bold))))
  '(font-lock-string-face ((t (:foreground "RosyBrown2")))))
+
