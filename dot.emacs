@@ -305,12 +305,26 @@
   )
 
 (define-abbrev-table 'my-lisp-abbrev-table
-  '(( "d" "defun")
-    ( "f" "defun")
-    ( "lbd" "lambda")
-    ( "lamba" "lambda")
-    ( "lamda" "lambda")
-    ( "lamdba" "lambda"))
+  '(("d" "defun")
+    ("f" "defun")
+    ("lbd" "lambda")
+    ("lamba" "lambda")
+    ("lamda" "lambda")
+    ("lamdba" "lambda"))
+  )
+
+(define-abbrev-table 'sylvain/python-abbrev-table
+  '(("imain" "if __name__ == '__main__':\n    ")
+    ( "ret" "return")
+    ("rt" "return")
+    ("slef" "self")
+    ("sf" "self")
+    ("lbd" "lambda")
+    ("lamba" "lambda")
+    ("lamda" "lambda")
+    ("lamdba" "lambda")
+    ("true" "True")
+    ("false" "False"))
   )
 
 (defun my-select-on-context (COMMENT STRING OTHER)
@@ -623,25 +637,17 @@ If in a GNU/Automake project, automatically build tags."
           '(lambda ()
              (local-set-key "\r" 'newline-and-indent)
              (modify-syntax-entry ?_ "w")
-             (setq indent-tabs-mode nil) ; spaces only
              (auto-fill-mode 1)
              (setq fill-column 80)
              (setq adaptive-fill-mode t)
              (fci-mode 1)
              (whitespace-mode 1)
-             (define-abbrev local-abbrev-table "imain"
-               "if __name__ == '__main__':\n    ")
-             (define-abbrev local-abbrev-table "ret" "return")
-             (define-abbrev local-abbrev-table "rt" "return")
-             (define-abbrev local-abbrev-table "slef" "self")
-             (define-abbrev local-abbrev-table "sef" "self")
-             (define-abbrev local-abbrev-table "sf" "self")
-             (define-abbrev local-abbrev-table "lbd" "lambda")
-             (define-abbrev local-abbrev-table "lamba" "lambda")
-             (define-abbrev local-abbrev-table "lamda" "lambda")
-             (define-abbrev local-abbrev-table "lamdba" "lambda")
-             (define-abbrev local-abbrev-table "true" "True")
-             (define-abbrev local-abbrev-table "false" "False")
+             (add-function
+              :around (local 'abbrev-expand-function)
+              '(lambda (expand) (let ((local-abbrev-table
+                                       (my-select-on-context
+                                        nil nil sylvain/python-abbrev-table)))
+                                  (funcall expand))))
              (add-hook 'my-show-company-overlay-hook
                        '(lambda() (turn-off-fci-mode)
                           (whitespace-mode -1))
@@ -1661,6 +1667,10 @@ If in a GNU/Automake project, automatically build tags."
  '(backup-directory-alist (quote (("." . "~/.emacs.files/backup"))))
  '(column-number-mode t)
  '(package-selected-packages (quote (fill-column-indicator company flycheck)))
+ '(safe-local-variable-values
+   (quote
+    ((flycheck-clang-language-standard . "c++11")
+     (flycheck-clang-language-standard . c++11))))
  '(save-abbrevs nil)
  '(tool-bar-mode nil nil (tool-bar)))
 
