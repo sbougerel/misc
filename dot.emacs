@@ -25,10 +25,6 @@
 (add-to-list 'package-archives
              '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
 
-(require 'server)
-(unless (server-running-p)
-  (server-start)) ; start the server now, for use with emacsclient
-
 ;; identification
 (setq user-full-name "Sylvain Bougerel")
 (setq user-mail-address "sylvain.bougerel@gmail.com")
@@ -71,6 +67,9 @@
 ;; bye bye menubar
 (menu-bar-mode -1)
 
+;; Default removal of indentation. Using SmartTabs from now on.
+(setq-default indent-tabs-mode nil)
+
 ;; I like abbrev
 (setq-default abbrev-mode t)
 (setq abbrev-file-name "~/.emacs.d/abbrev_defs")
@@ -85,9 +84,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; COLOR
-(require 'color)
 
 ;; Custom theme
+(require 'color)
 (set-foreground-color "gainsboro")
 (set-background-color "#33393d")
 (set-cursor-color "magenta")
@@ -102,6 +101,7 @@
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))
 
 ;; Make whitespace more subtle
+(require 'whitespace)
 (with-eval-after-load 'whitespace
   (setq-default whitespace-style '(face tabs spaces trailing
                                         space-before-tab indentation
@@ -131,26 +131,27 @@
 (setq load-path
       (cons "~/.emacs.d/lisp/" load-path))
 
-(add-hook 'after-init-hook '(lambda ()
-                              (require 'fill-column-indicator)
-                              (setq fci-rule-color "gray")))
+(require 'cmake-mode)
 
-(add-hook 'after-init-hook 'global-flycheck-mode)
+(require 'flycheck)
+(with-eval-after-load 'flycheck
+  (global-flycheck-mode))
 
-(defvar my-show-company-overlay-hook nil
+(defvar sylvain/show-company-overlay-hook nil
   "A hook that is called before company overlay is shown.")
-(defvar my-hide-company-overlay-hook nil
+(defvar sylvain/hide-company-overlay-hook nil
   "A hook that is called before company overlay is hidden.")
 
-(add-hook 'after-init-hook 'global-company-mode)
+(require 'company)
 (with-eval-after-load 'company
-  (defun my-company-call-frontends-before (command)
+  (global-company-mode)
+  (defun sylvain/company-call-frontends-before (command)
     (when (string= "show" command)
-      (run-hooks 'my-show-company-overlay-hook))
+      (run-hooks 'sylvain/show-company-overlay-hook))
     (when (string= "hide" command)
-      (run-hooks 'my-hide-company-overlay-hook)))
+      (run-hooks 'sylvain/hide-company-overlay-hook)))
   (advice-add 'company-call-frontends :before
-              #'my-company-call-frontends-before)
+              #'sylvain/company-call-frontends-before)
   (let ((bg (face-attribute 'default :background))
         (fg (face-attribute 'default :foreground)))
     (set-face-attribute 'company-tooltip nil
@@ -159,6 +160,10 @@
                         :background (color-darken-name fg 20))
     (set-face-attribute 'company-scrollbar-fg nil
                         :background (color-darken-name fg 40))))
+
+(require 'smart-tabs-mode)
+(with-eval-after-load 'smart-tabs-mode
+  (smart-tabs-insinuate 'c 'javascript 'c++ 'java 'ruby 'cperl 'nxml))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Skeletons & Abbrevs
@@ -172,61 +177,61 @@
 ;; Don't mix with abbrev
 (setq-default skeleton-further-elements '((abbrev-mode nil)))
 
-(define-skeleton my-skel-c-main
+(define-skeleton sylvain/skel-c-main
   "Insert a main, cool..."
   nil
   "int main (int argc, char **argv, char **env)" >
-  "\n{" > "\n" > _ "\n}" > "\n")
+  "\n{" > "\n" > _ "\n" > "return 0;\n" > "}" > "\n")
 
-(define-skeleton my-skel-c-if
+(define-skeleton sylvain/skel-c-if
   "Insert parenthesis after C style \`if\' construct"
   nil "if (" _ ")" >)
 
-(define-skeleton my-skel-c-for
+(define-skeleton sylvain/skel-c-for
   "Insert parenthesis after C style \`for\' construct"
   nil "for (" _ ")" >)
 
-(define-skeleton my-skel-c-while
+(define-skeleton sylvain/skel-c-while
   "Insert parenthesis after C \`while\' construct"
   nil "while (" _ ")" >)
 
-(define-skeleton my-skel-c-do-while
+(define-skeleton sylvain/skel-c-do-while
   "Insert a standard C style \`do while\' construct"
   nil "do" > "\n{" > "\n" > _ "\n} while ();" >)
 
-(define-skeleton my-skel-c-else-if
+(define-skeleton sylvain/skel-c-else-if
   "Insert paranthesis in C \`else if\' construct"
   nil "else if (" _ ")" >)
 
-(define-abbrev-table 'my-c-abbrev-table
-  '(("imain" "" my-skel-c-main)
-    ("main" "" my-skel-c-main)
-    ("imain" "" my-skel-c-main)
-    ("intmain" "" my-skel-c-main)
+(define-abbrev-table 'sylvain/c-abbrev-table
+  '(("imain" "" sylvain/skel-c-main)
+    ("main" "" sylvain/skel-c-main)
+    ("imain" "" sylvain/skel-c-main)
+    ("intmain" "" sylvain/skel-c-main)
     ("td" "typedef")
     ("ret" "return")
     ("rt" "return")
     ("vd" "void")
-    ("for" "" my-skel-c-for)
-    ("wihle" "" my-skel-c-while)
-    ("whlie" "" my-skel-c-while)
-    ("while" "" my-skel-c-while)
-    ("if" "" my-skel-c-if)
-    ("elseif" "" my-skel-c-else-if)
-    ("elsif" "" my-skel-c-else-if)
-    ("elif" "" my-skel-c-else-if)
-    ("do" "" my-skel-c-do-while))
+    ("for" "" sylvain/skel-c-for)
+    ("wihle" "" sylvain/skel-c-while)
+    ("whlie" "" sylvain/skel-c-while)
+    ("while" "" sylvain/skel-c-while)
+    ("if" "" sylvain/skel-c-if)
+    ("elseif" "" sylvain/skel-c-else-if)
+    ("elsif" "" sylvain/skel-c-else-if)
+    ("elif" "" sylvain/skel-c-else-if)
+    ("do" "" sylvain/skel-c-do-while))
   )
 
-(define-skeleton my-skel-c++-template-typename
+(define-skeleton sylvain/skel-c++-template-typename
   "Inserts template<typename >"
   nil "template<typename " _ ">" >)
 
-(define-skeleton my-skel-c++-template-class
+(define-skeleton sylvain/skel-c++-template-class
   "Inserts template<typename >"
   nil "template<class " _ ">" >)
 
-(define-skeleton my-skel-c++-std-map
+(define-skeleton sylvain/skel-c++-std-map
   "Inserts std::map<>" nil "std::map<" _ ">" >)
 
 (tempo-define-template "forit"
@@ -235,8 +240,8 @@
       (s it) " != " (s container) ".end(); ++" (s it) ")" n "{" > n > n "}"
       >))
 
-(defvar my-c++-abbrev-table (copy-abbrev-table my-c-abbrev-table))
-(define-abbrev-table 'my-c++-abbrev-table
+(defvar sylvain/c++-abbrev-table (copy-abbrev-table sylvain/c-abbrev-table))
+(define-abbrev-table 'sylvain/c++-abbrev-table
   '(("forit" "" tempo-template-forit)
     ("std" "std:")
     ("sd" "std:")
@@ -270,9 +275,9 @@
     ("cir" "const_iterator")
     ("tl" "template")
     ("tn" "typename")
-    ("tt" "" my-skel-c++-template-typename)
-    ("tc" "" my-skel-c++-template-class)
-    ("smap" "" my-skel-c++-std-map)
+    ("tt" "" sylvain/skel-c++-template-typename)
+    ("tc" "" sylvain/skel-c++-template-class)
+    ("smap" "" sylvain/skel-c++-std-map)
     ("sset" "std::set<")
     ("svec" "std::vector<")
     ("svector" "std::vector<")
@@ -281,15 +286,15 @@
     ("rc" "reinterpret_cast<"))
   )
 
-(define-skeleton my-skel-javadoc
+(define-skeleton sylvain/skel-javadoc
   "Insert the brief and close the comment"
   nil "*" > "\n*  " > _ "\n*/" >)
 
-(define-skeleton my-skel-qtdoc
+(define-skeleton sylvain/skel-qtdoc
   "Insert the brief and close the comment"
   nil "!" > "\n*  " > _ "\n*/" >)
 
-(define-abbrev-table 'my-javadoc-abbrev-table
+(define-abbrev-table 'sylvain/javadoc-abbrev-table
   '(("@b" "@brief")
     ("@p" "@param")
     ("@r" "@return")
@@ -298,13 +303,13 @@
     ("@e" "@enum"))
   )
 
-(define-abbrev-table 'my-php-abbrev-table
+(define-abbrev-table 'sylvain/php-abbrev-table
   '(("f" "function")
     ("func" "function")
     ("fc" "function"))
   )
 
-(define-abbrev-table 'my-lisp-abbrev-table
+(define-abbrev-table 'sylvain/lisp-abbrev-table
   '(("d" "defun")
     ("f" "defun")
     ("lbd" "lambda")
@@ -327,7 +332,7 @@
     ("false" "False"))
   )
 
-(defun my-select-on-context (COMMENT STRING OTHER)
+(defun sylvain/select-on-context (COMMENT STRING OTHER)
   "Return COMMENT, STRING or CODE based on the current context.
 If point is in a comment, returns COMMENT.
 If point is in a string, return STRING.
@@ -335,31 +340,31 @@ Otherwise, returns OTHER."
   (let ((P (syntax-ppss))) (if (nth 4 P) COMMENT
                              (if (nth 3 P) STRING
                                OTHER))))
-(byte-compile 'my-select-on-context)
+(byte-compile 'sylvain/select-on-context)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; UTILITIES
 
-(defvar my-key-swapped-p nil
+(defvar sylvain/key-swapped-p nil
   "Tell whether or not I swapped my keyboard: t if I did, nil otherwise.")
 
-(defun my-swap-keyboard ()
+(defun sylvain/swap-keyboard ()
   "Swap some keys of my keyboard.\nPresently: ?- and ?_ only are swapped."
   (interactive)
-  (if my-key-swapped-p
+  (if sylvain/key-swapped-p
       (progn
         (keyboard-translate ?_ ?_)
         (keyboard-translate ?- ?-)
-        (setq my-key-swapped-p nil)
+        (setq sylvain/key-swapped-p nil)
         (message "Keyboard restored")
         )
     (keyboard-translate ?_ ?-)
     (keyboard-translate ?- ?_)
-    (setq my-key-swapped-p t)
+    (setq sylvain/key-swapped-p t)
     (message "Keyboard swapped")
     ))
 
-(defun my-insert-file-with-prefix (filename &optional prefix)
+(defun sylvain/insert-file-with-prefix (filename &optional prefix)
   "Insert file FILENAME at point and fill every paragraph with `fill-paragraph'.
 
   Optional argument PREFIX must be a string or null.  If null,
@@ -384,27 +389,27 @@ Otherwise, returns OTHER."
               (replace-match (concat "\n" prefix)))))
       )))
 
-(defun my-next-eol ()
+(defun sylvain/next-eol ()
   "Move to the next blank eol."
   (interactive)
   (forward-paragraph)
   (end-of-line))
-(byte-compile 'my-next-eol)
+(byte-compile 'sylvain/next-eol)
 
-(defun my-prev-eol ()
+(defun sylvain/prev-eol ()
   "Move to the previous blank eol."
   (interactive)
   (backward-paragraph)
   (unless (= (point) (line-end-position)) (backward-char)))
-(byte-compile 'my-prev-eol)
+(byte-compile 'sylvain/prev-eol)
 
-(defun my-coding-context-p ()
+(defun sylvain/coding-context-p ()
   "Return non-nil if point is not within a string or a comment."
   (let ((P (syntax-ppss)))
     (null (or (nth 3 P) (nth 4 P)))))
-(byte-compile 'my-coding-context-p)
+(byte-compile 'sylvain/coding-context-p)
 
-(defun my-c-compactor ()
+(defun sylvain/c-compactor ()
   "Concatenate the sexp at point on a single line."
   (interactive)
   (save-excursion
@@ -417,14 +422,14 @@ Otherwise, returns OTHER."
               (END nil))
           (while (and (/= LVL 0)
                       (re-search-backward "\\({\\)\\|\\(}\\)" (point-min) t))
-            (if (my-coding-context-p)
+            (if (sylvain/coding-context-p)
                 (cond ((= (char-after (point)) ?}) (setq LVL (1+ LVL)))
                       ((= (char-after (point)) ?{) (setq LVL (1- LVL))))))
           (if (/= LVL 0) (error "Not within a `{}' block")
             (setq BEG (point)) (goto-char INIT) (setq LVL 1)
             (while (and (/= LVL 0)
                         (re-search-forward "\\({\\)\\|\\(}\\)" (point-max) t))
-              (if (my-coding-context-p)
+              (if (sylvain/coding-context-p)
                   (cond ((= (char-before (point)) ?}) (setq LVL (1- LVL)))
                         ((= (char-before (point)) ?{) (setq LVL (1+ LVL))))))
             (if (/= LVL 0) (error "Not within a `{}' block")
@@ -432,25 +437,25 @@ Otherwise, returns OTHER."
               (narrow-to-region BEG END)
               (while (re-search-forward "[\n\r\t ]+" nil t)
                 (replace-match " ")))))))))
-(byte-compile 'my-c-compactor)
+(byte-compile 'sylvain/c-compactor)
 
-(defun my-at (pattern)
+(defun sylvain/at (pattern)
   "If string before point match PATTERN, return t, else nil."
   (string-equal pattern (buffer-substring-no-properties
                          (if (< (point) (length pattern)) 0
                            (- (point) (length pattern)))
                          (point))))
-(byte-compile 'my-at)
+(byte-compile 'sylvain/at)
 
-(defun my-delete-indentation ()
+(defun sylvain/delete-indentation ()
   "Delete all the white space at the beginning of the line."
   (interactive)
   (save-excursion
     (back-to-indentation)
     (delete-char (- (point-at-bol) (point)))))
-(byte-compile 'my-delete-indentation)
+(byte-compile 'sylvain/delete-indentation)
 
-(defun my-rename (OLD NEW)
+(defun sylvain/rename (OLD NEW)
   "Rename the word OLD by the word NEW.
 Do not replace part of the word, replace either the whole word or nothing."
   (interactive "*srename: \nsrename %s by: \n")
@@ -461,23 +466,24 @@ Do not replace part of the word, replace either the whole word or nothing."
         (goto-char (point-min))
         (let ((case-fold-search nil) ;; case-sensitive search here!
               (COUNT 0)
-              (REGEXP (concat "\\([^_a-zA-Z0-9]\\|^\\)" OLD "\\([^_a-zA-Z0-9]\\|$\\)" ))
+              (REGEXP (concat "\\([^_a-zA-Z0-9]\\|^\\)"
+                              OLD "\\([^_a-zA-Z0-9]\\|$\\)" ))
               (REPLACE (concat "\\1" NEW "\\2")))
           (while (re-search-forward REGEXP (point-max) t)
-            (when (my-coding-context-p)
+            (when (sylvain/coding-context-p)
               (replace-match REPLACE t nil)
               (setq COUNT (1+ COUNT))))
           (message "Renamed %d occurence(s)." COUNT))))))
-(byte-compile 'my-rename)
+(byte-compile 'sylvain/rename)
 
-(defun my-file-untabify ()
+(defun sylvain/file-untabify ()
   "Change all tabs into spaces in a file."
   (interactive "*")
   (save-restriction
     (widen)
     (untabify (point-min) (point-max))
     ))
-(byte-compile 'my-file-untabify)
+(byte-compile 'sylvain/file-untabify)
 
 (defadvice find-tag (before c-tag-file activate)
   "Automatically visit tags file when finding tags.
@@ -493,196 +499,171 @@ If in a GNU/Automake project, automatically build tags."
 ;;; HOOKS SETTINGS
 
 (add-hook 'text-mode-hook
-          '(lambda ()
-             (flycheck-mode -1)
-             (company-mode -1)
-             (modify-syntax-entry ?_ "w")
-             (auto-fill-mode 1)
-             (setq fill-column 80)
-             (setq adaptive-fill-mode t)
-             (fci-mode 1)
-             (whitespace-mode 1)
-             ))
-
-(add-hook 'change-log-mode-hook
-          '(lambda ()
-             (flycheck-mode -1)
-             (company-mode -1)
-             (auto-fill-mode 1)
-             (setq fill-column 80)
-             (setq adaptive-fill-mode t)
-             (fci-mode 1)
-             (whitespace-mode 1)
-             ))
-
-(add-hook 'c-mode-common-hook
-          '(lambda ()
-             (modify-syntax-entry ?_ "w")
-             (modify-syntax-entry ?@ "w")
-             (local-set-key [?\C-x ?\C-.] 'find-file-at-point)
-             (setq c-syntactic-indentation t)
-             (c-toggle-hungry-state 1)
-             (c-toggle-electric-state 1)
-             (local-set-key "*" '(lambda ()
-                                   (interactive)
-                                   (if (my-at "/*") (my-skel-javadoc)
-                                     (c-electric-star nil))))
-             (local-set-key "!" '(lambda ()
-                                   (interactive)
-                                   (if (my-at "/*") (my-skel-qtdoc)
-                                     (self-insert-command 1))))
-             (local-set-key "\r" '(lambda ()
-                                    (interactive)
-                                    (if (nth 4 (syntax-ppss))
-                                        (let ((S (fill-context-prefix
-                                                  (point-at-bol) (point))))
-                                          (newline) (insert S))
-                                      (newline-and-indent))))
-             (c-set-style "gnu")
-             (setq indent-tabs-mode nil) ; non-nil tab, nil no-tabs
-             (auto-fill-mode 1)
-             (setq fill-column 80)
-             (setq adaptive-fill-mode t)
-             (fci-mode 1)
-             (whitespace-mode 1)
-             (add-hook 'my-show-company-overlay-hook
-                       '(lambda() (turn-off-fci-mode)
-                          (whitespace-mode -1))
-                       nil t)
-             (add-hook 'my-hide-company-overlay-hook
-                       '(lambda() (turn-on-fci-mode)
-                          (whitespace-mode 1))
-                       nil t)
-             (add-hook 'before-save-hook 'delete-trailing-whitespace)
-             (add-hook 'before-save-hook 'my-file-untabify)
-             ))
+          (lambda ()
+            (flycheck-mode 0)
+            (company-mode 0)
+            (modify-syntax-entry ?_ "w")
+            (auto-fill-mode 1)
+            (setq fill-column 80)
+            (setq adaptive-fill-mode t)
+            (whitespace-mode 1)
+            (message "text-mode-hook applied")
+            ))
 
 (add-hook 'c-mode-hook
-          '(lambda ()
-             (add-function
-              :around (local 'abbrev-expand-function)
-              '(lambda (expand) (let ((local-abbrev-table
-                                       (my-select-on-context
-                                        my-javadoc-abbrev-table nil
-                                        my-c-abbrev-table)))
-                                  (funcall expand))))
-             ))
+          (lambda ()
+            (modify-syntax-entry ?_ "w")
+            (modify-syntax-entry ?@ "w")
+            (local-set-key [?\C-x ?\C-.] 'find-file-at-point)
+            (c-toggle-hungry-state 1)
+            (c-toggle-electric-state 1)
+            (local-set-key "*" '(lambda ()
+                                  (interactive)
+                                  (if (sylvain/at "/*") (sylvain/skel-javadoc)
+                                    (c-electric-star nil))))
+            (local-set-key "!" '(lambda ()
+                                  (interactive)
+                                  (if (sylvain/at "/*") (sylvain/skel-qtdoc)
+                                    (self-insert-command 1))))
+            (local-set-key "\r" '(lambda ()
+                                   (interactive)
+                                   (if (nth 4 (syntax-ppss))
+                                       (let ((S (fill-context-prefix
+                                                 (point-at-bol) (point))))
+                                         (newline) (insert S))
+                                     (newline-and-indent))))
+            (setq indent-tabs-mode t) ; Smart tabs
+            (setq tab-width 2)
+            (c-set-style "ellemtel")
+            (setq c-basic-offset 2)
+            (auto-fill-mode 1)
+            (setq fill-column 80)
+            (setq adaptive-fill-mode t)
+            (whitespace-mode 1)
+            (add-hook 'sylvain/show-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode -1))
+                      nil t)
+            (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode 1))
+                      nil t)
+            (add-function
+             :around (local 'abbrev-expand-function)
+             '(lambda (expand) (let ((local-abbrev-table
+                                      (sylvain/select-on-context
+                                       sylvain/javadoc-abbrev-table nil
+                                       sylvain/c-abbrev-table)))
+                                 (funcall expand))))
+            (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+            (message "c-mode-hook applied")
+            ))
 
 (add-hook 'c++-mode-hook
-          '(lambda ()
-             (add-function
-              :around (local 'abbrev-expand-function)
-              '(lambda (expand) (let ((local-abbrev-table
-                                       (my-select-on-context
-                                        my-javadoc-abbrev-table
-                                        nil my-c++-abbrev-table)))
-                                  (funcall expand))))
-             ))
+          (lambda ()
+            (modify-syntax-entry ?_ "w")
+            (modify-syntax-entry ?@ "w")
+            (local-set-key [?\C-x ?\C-.] 'find-file-at-point)
+            (c-toggle-hungry-state 1)
+            (c-toggle-electric-state 1)
+            (local-set-key "*" '(lambda ()
+                                  (interactive)
+                                  (if (sylvain/at "/*") (sylvain/skel-javadoc)
+                                    (c-electric-star nil))))
+            (local-set-key "!" '(lambda ()
+                                  (interactive)
+                                  (if (sylvain/at "/*") (sylvain/skel-qtdoc)
+                                    (self-insert-command 1))))
+            (local-set-key "\r" '(lambda ()
+                                   (interactive)
+                                   (if (nth 4 (syntax-ppss))
+                                       (let ((S (fill-context-prefix
+                                                 (point-at-bol) (point))))
+                                         (newline) (insert S))
+                                     (newline-and-indent))))
+            (setq indent-tabs-mode t) ; Smart tabs
+            (setq tab-width 2)
+            (c-set-style "ellemtel")
+            (setq c-basic-offset 2)
+            (auto-fill-mode 1)
+            (setq fill-column 80)
+            (setq adaptive-fill-mode t)
+            (whitespace-mode 1)
+            (add-hook 'sylvain/show-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode -1))
+                      nil t)
+            (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode 1))
+                      nil t)
+            (add-function
+             :around (local 'abbrev-expand-function)
+             '(lambda (expand) (let ((local-abbrev-table
+                                      (sylvain/select-on-context
+                                       sylvain/javadoc-abbrev-table
+                                       nil sylvain/c++-abbrev-table)))
+                                 (funcall expand))))
+            (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+            (message "c++-mode-hook applied")
+            ))
 
-(add-hook 'php-mode-hook
-          '(lambda ()
-             (local-set-key "\r" 'newline-and-indent)
-             (auto-fill-mode 1)
-             (setq fill-column 80)
-             (setq adaptive-fill-mode t)
-             (setq indent-tabs-mode nil) ; spaces only
-             (fci-mode 1)
-             (whitespace-mode 1)
-             (add-hook 'my-show-company-overlay-hook
-                       '(lambda() (turn-off-fci-mode)
-                          (whitespace-mode -1))
-                       nil t)
-             (add-hook 'my-hide-company-overlay-hook
-                       '(lambda() (turn-on-fci-mode)
-                          (whitespace-mode 1))
-                       nil t)
-             (add-function
-              :around (local 'abbrev-expand-function)
-              '(lambda (expand) (let ((local-abbrev-table
-                                       (my-select-on-context
-                                        nil nil my-php-abbrev-table)))
-                                  (funcall expand))))
-             (add-hook 'before-save-hook 'delete-trailing-whitespace)
-             (add-hook 'before-save-hook 'my-file-untabify)
-             ))
-
-(defun my-lisp-settings ()
-  "Settings for Lisp and Emacs-Lisp."
+(defun sylvain/emacs-lisp-settings ()
+  "Settings for Emacs-Lisp."
+  (interactive)
   (local-set-key "\r" 'newline-and-indent)
   (modify-syntax-entry ?- "w")
   (modify-syntax-entry ?_ "w")
-  (setq indent-tabs-mode nil) ; spaces only
   (auto-fill-mode 1)
   (setq fill-column 80)
   (setq adaptive-fill-mode t)
-  (fci-mode 1)
   (whitespace-mode 1)
-  (add-hook 'my-show-company-overlay-hook
-            '(lambda() (turn-off-fci-mode)
-               (whitespace-mode -1))
+  (add-hook 'sylvain/show-company-overlay-hook
+            (lambda()
+              (whitespace-mode -1))
             nil t)
-  (add-hook 'my-hide-company-overlay-hook
-            '(lambda() (turn-on-fci-mode)
-               (whitespace-mode 1))
+  (add-hook 'sylvain/hide-company-overlay-hook
+            (lambda()
+              (whitespace-mode 1))
             nil t)
   (add-function
    :around (local 'abbrev-expand-function)
    '(lambda (expand) (let ((local-abbrev-table
-                            (my-select-on-context
-                             nil nil my-lisp-abbrev-table)))
+                            (sylvain/select-on-context
+                             nil nil sylvain/lisp-abbrev-table)))
                        (funcall expand))))
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
-  (add-hook 'before-save-hook 'my-file-untabify)
+  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+  (add-hook 'before-save-hook #'sylvain/file-untabify nil t)
+  (message "emacs-lisp-settings applied")
   )
-(add-hook 'lisp-mode-hook 'my-lisp-settings)
-(add-hook 'emacs-lisp-mode-hook 'my-lisp-settings)
+(add-hook 'emacs-lisp-mode-hook 'sylvain/emacs-lisp-settings)
 
 (add-hook 'python-mode-hook
-          '(lambda ()
-             (local-set-key "\r" 'newline-and-indent)
-             (modify-syntax-entry ?_ "w")
-             (auto-fill-mode 1)
-             (setq fill-column 80)
-             (setq adaptive-fill-mode t)
-             (fci-mode 1)
-             (whitespace-mode 1)
-             (add-function
-              :around (local 'abbrev-expand-function)
-              '(lambda (expand) (let ((local-abbrev-table
-                                       (my-select-on-context
-                                        nil nil sylvain/python-abbrev-table)))
-                                  (funcall expand))))
-             (add-hook 'my-show-company-overlay-hook
-                       '(lambda() (turn-off-fci-mode)
-                          (whitespace-mode -1))
-                       nil t)
-             (add-hook 'my-hide-company-overlay-hook
-                       '(lambda() (turn-on-fci-mode)
-                          (whitespace-mode 1))
-                       nil t)
-             (add-hook 'before-save-hook 'delete-trailing-whitespace)
-             ))
-
-(add-hook 'sgml-mode-hook
-          '(lambda ()
-             (local-set-key "\r" 'newline-and-indent)
-             (setq sgml-quick-keys t)
-             (setq indent-tabs-mode nil) ; spaces only
-             (auto-fill-mode 1)
-             (setq fill-column 80)
-             (setq adaptive-fill-mode t)
-             (whitespace-mode 1)
-             (add-hook 'my-show-company-overlay-hook
-                       '(lambda()
-                          (whitespace-mode -1))
-                       nil t)
-             (add-hook 'my-hide-company-overlay-hook
-                       '(lambda()
-                          (whitespace-mode 1))
-                       nil t)
-             (add-hook 'before-save-hook 'my-file-untabify)
-             (add-hook 'before-save-hook 'delete-trailing-whitespace)
-             ))
+          (lambda ()
+            (local-set-key "\r" 'newline-and-indent)
+            (modify-syntax-entry ?_ "w")
+            (auto-fill-mode 1)
+            (setq fill-column 80)
+            (setq adaptive-fill-mode t)
+            (whitespace-mode 1)
+            (add-function
+             :around (local 'abbrev-expand-function)
+             '(lambda (expand) (let ((local-abbrev-table
+                                      (sylvain/select-on-context
+                                       nil nil sylvain/python-abbrev-table)))
+                                 (funcall expand))))
+            (add-hook 'sylvain/show-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode -1))
+                      nil t)
+            (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode 1))
+                      nil t)
+            (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+            (add-hook 'before-save-hook #'sylvain/file-untabify nil t)
+            (message "python-mode-settings applied")
+            ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; GLOBAL SET KEYS
@@ -697,20 +678,20 @@ If in a GNU/Automake project, automatically build tags."
 (global-set-key '[M-down]  'pager-row-down)
 (global-set-key '[M-kp-2]  'pager-row-down)
 
-(global-set-key "\C-cr" 'my-rename)
+(global-set-key "\C-cr" 'sylvain/rename)
 (global-set-key [?\C-c ?\r] 'delete-trailing-whitespace)
 (global-set-key "\M-g" 'goto-line) ; I don't use face selection
-(global-set-key [backtab]  'my-delete-indentation)
+(global-set-key [backtab]  'sylvain/delete-indentation)
 (global-set-key "\C-ck" 'compile) ; I tend to compile often :-)
 (global-set-key [?\C-c ?/] 'replace-regexp) ; better than query replace
-(global-set-key [?\C-v] 'my-next-eol) ; one useful rebind
-(global-set-key [?\M-\r] 'my-next-eol) ; a different more practical way
-(global-set-key [?\M-v] 'my-prev-eol)
-(global-set-key '[C-return] 'my-prev-eol) ; a different more practical way
+(global-set-key [?\C-v] 'sylvain/next-eol) ; one useful rebind
+(global-set-key [?\M-\r] 'sylvain/next-eol) ; a different more practical way
+(global-set-key [?\M-v] 'sylvain/prev-eol)
+(global-set-key '[C-return] 'sylvain/prev-eol) ; a different more practical way
 (global-set-key '[M-right] 'forward-sexp)
 (global-set-key '[M-left] 'backward-sexp)
-(global-set-key [?\C-z] 'my-c-compactor)
-(global-set-key [f9] 'my-swap-keyboard)
+(global-set-key [?\C-z] 'sylvain/c-compactor)
+(global-set-key [f9] 'sylvain/swap-keyboard)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EMACS SESSION
@@ -1673,10 +1654,11 @@ If in a GNU/Automake project, automatically build tags."
  '(auto-save-list-file-prefix "~/.emacs.files/auto-save-list/.saves-")
  '(backup-directory-alist (quote (("." . "~/.emacs.files/backup"))))
  '(column-number-mode t)
- '(package-selected-packages (quote (fill-column-indicator company flycheck)))
+ '(package-selected-packages (quote (cmake-mode smart-tabs-mode company flycheck)))
  '(safe-local-variable-values
    (quote
-    ((flycheck-clang-language-standard . "c++11"))))
+    ((company-clang-arguments "-std=c++11")
+     (flycheck-clang-language-standard . "c++11"))))
  '(save-abbrevs nil)
  '(tool-bar-mode nil nil (tool-bar)))
 
@@ -1687,4 +1669,3 @@ If in a GNU/Automake project, automatically build tags."
  ;; If there is more than one, they won't work right.
  '(font-lock-keyword-face ((t (:foreground "Cyan1" :weight bold))))
  '(font-lock-string-face ((t (:foreground "RosyBrown2")))))
-
