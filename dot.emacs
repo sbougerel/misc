@@ -1658,7 +1658,9 @@ If in a GNU/Automake project, automatically build tags."
  '(auto-save-list-file-prefix "~/.emacs.files/auto-save-list/.saves-")
  '(backup-directory-alist (quote (("." . "~/.emacs.files/backup"))))
  '(column-number-mode t)
- '(package-selected-packages (quote (cmake-mode smart-tabs-mode company flycheck)))
+ '(package-selected-packages
+   (quote
+    (go-mode cmake-mode smart-tabs-mode company flycheck)))
  '(safe-local-variable-values
    (quote
     ((company-clang-arguments "-std=c++11")
