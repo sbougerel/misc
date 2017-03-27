@@ -91,7 +91,11 @@
 (set-background-color "#33393d")
 (set-cursor-color "magenta")
 (set-mouse-color "white")
-(set-frame-font "DejaVu Sans Mono-9" t)
+(if (eq system-type 'darwin)
+    (progn
+      (set-face-attribute 'default nil :family "DejaVu Sans Mono")
+      (set-face-attribute 'default nil :height 110))
+  (set-frame-font "DejaVu Sans Mono-10" t))
 
 ;; Frame-based (emacsclient) configuration
 (add-to-list 'default-frame-alist '(foreground-color . "gainsboro"))
