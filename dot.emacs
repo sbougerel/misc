@@ -94,7 +94,7 @@
 (if (eq system-type 'darwin)
     (progn
       (set-face-attribute 'default nil :family "DejaVu Sans Mono")
-      (set-face-attribute 'default nil :height 110))
+      (set-face-attribute 'default nil :height 120))
   (set-frame-font "DejaVu Sans Mono-10" t))
 
 ;; Frame-based (emacsclient) configuration
@@ -102,7 +102,11 @@
 (add-to-list 'default-frame-alist '(background-color . "#33393d"))
 (add-to-list 'default-frame-alist '(cursor-color . "magenta"))
 (add-to-list 'default-frame-alist '(mouse-color . "white"))
-(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))
+(if (eq system-type 'darwin)
+    (progn
+      (add-to-list 'default-frame-alist
+                   '(font . "-*-DejaVu Sans Mono-normal-normal-normal-*-*-120-*-*-m-0-iso10646-1")))
+  (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10")))
 
 ;; Make whitespace more subtle
 (require 'whitespace)
@@ -130,12 +134,21 @@
   (set-face-foreground 'whitespace-trailing "red"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Package loading: FlyCheck, Company
+;;; Package loading: FlyCheck, Company, etc..
 
 (setq load-path
       (cons "~/.emacs.d/lisp/" load-path))
 
+(require 'exec-path-from-shell)
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize)
+  (exec-path-from-shell-copy-env "GOPATH")
+  )
+
 (require 'cmake-mode)
+(require 'go-mode)
+(require 'go-guru)
+(require 'php-mode)
 
 (require 'flycheck)
 (with-eval-after-load 'flycheck
@@ -150,6 +163,7 @@
 (with-eval-after-load 'company
   (global-company-mode)
   (defun sylvain/company-call-frontends-before (command)
+    (message "Company call frontends called with")
     (when (string= "show" command)
       (run-hooks 'sylvain/show-company-overlay-hook))
     (when (string= "hide" command)
@@ -163,7 +177,11 @@
     (set-face-attribute 'company-scrollbar-bg nil
                         :background (color-darken-name fg 20))
     (set-face-attribute 'company-scrollbar-fg nil
-                        :background (color-darken-name fg 40))))
+                        :background (color-darken-name fg 40)))
+  (setq company-idle-delay .3)
+  (setq company-echo-delay 0)
+  (setq-default company-dabbrev-downcase nil))
+(require 'company-go)
 
 (require 'smart-tabs-mode)
 (with-eval-after-load 'smart-tabs-mode
@@ -500,7 +518,7 @@ If in a GNU/Automake project, automatically build tags."
     (visit-tags-table tag-file)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; HOOKS SETTINGS
+;;; MODES SETTINGS
 
 (add-hook 'text-mode-hook
           (lambda ()
@@ -539,7 +557,7 @@ If in a GNU/Automake project, automatically build tags."
             (setq indent-tabs-mode t) ; Smart tabs
             (setq tab-width 2)
             (c-set-style "ellemtel")
-            (setq c-basic-offset 2)
+            (setq-default c-basic-offset 2)
             (auto-fill-mode 1)
             (setq fill-column 80)
             (setq adaptive-fill-mode t)
@@ -588,7 +606,7 @@ If in a GNU/Automake project, automatically build tags."
             (setq indent-tabs-mode t) ; Smart tabs
             (setq tab-width 2)
             (c-set-style "ellemtel")
-            (setq c-basic-offset 2)
+            (setq-default c-basic-offset 2)
             (auto-fill-mode 1)
             (setq fill-column 80)
             (setq adaptive-fill-mode t)
@@ -649,7 +667,6 @@ If in a GNU/Automake project, automatically build tags."
             (auto-fill-mode 1)
             (setq fill-column 80)
             (setq adaptive-fill-mode t)
-            (whitespace-mode 1)
             (add-function
              :around (local 'abbrev-expand-function)
              '(lambda (expand) (let ((local-abbrev-table
@@ -664,10 +681,36 @@ If in a GNU/Automake project, automatically build tags."
                       (lambda()
                         (whitespace-mode 1))
                       nil t)
+            (whitespace-mode 1)
             (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
             (add-hook 'before-save-hook #'sylvain/file-untabify nil t)
             (message "python-mode-settings applied")
             ))
+
+(add-hook 'go-mode-hook
+          (lambda ()
+            (local-set-key "\r" 'newline-and-indent)
+            (auto-fill-mode 1)
+            (setq fill-column 120)
+            (setq adaptive-fill-mode t)
+            (setq tab-width 4)
+            (add-hook 'sylvain/show-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode -1))
+                      nil t)
+            (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode 1))
+                      nil t)
+            (whitespace-mode 1)
+            (go-guru-hl-identifier-mode 1)
+            (set (make-local-variable 'company-backends)
+                 '(company-go company-dabbrev-code))
+            (local-set-key [?\M-.] 'godef-jump)
+            (local-set-key [?\M-,] 'pop-tag-mark)
+            (setq-default gofmt-command "goimports")
+            (add-hook 'before-save-hook #'gofmt-before-save nil t)
+             ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; GLOBAL SET KEYS
@@ -696,6 +739,10 @@ If in a GNU/Automake project, automatically build tags."
 (global-set-key '[M-left] 'backward-sexp)
 (global-set-key [?\C-z] 'sylvain/c-compactor)
 (global-set-key [f9] 'sylvain/swap-keyboard)
+(global-set-key [home] 'beginning-of-line)
+(global-set-key [end] 'end-of-line)
+(global-set-key [?\C-x down] (lambda() (interactive) (other-window 1)))
+(global-set-key [?\C-x up] (lambda() (interactive) (other-window -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EMACS SESSION
@@ -1660,7 +1707,7 @@ If in a GNU/Automake project, automatically build tags."
  '(column-number-mode t)
  '(package-selected-packages
    (quote
-    (go-mode cmake-mode smart-tabs-mode company flycheck)))
+    (exec-path-from-shell php-mode go-mode go-guru cmake-mode smart-tabs-mode company flycheck company-go)))
  '(safe-local-variable-values
    (quote
     ((company-clang-arguments "-std=c++11")
