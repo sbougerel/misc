@@ -74,12 +74,7 @@
 (setq-default abbrev-mode t)
 (setq abbrev-file-name "~/.emacs.d/abbrev_defs")
 
-;; Some other auto modes
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; more often C++...
-(add-to-list 'auto-mode-alist '("\\.l\\'" . c-mode) t)
-(add-to-list 'auto-mode-alist '("\\.l\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
-(add-to-list 'auto-mode-alist '("\\.y\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) t)
-
+;; Idem for auto insert
 (add-hook 'find-file-hook 'auto-insert)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -149,6 +144,7 @@
 (require 'go-mode)
 (require 'go-guru)
 (require 'php-mode)
+(require 'web-mode)
 
 (require 'flycheck)
 (with-eval-after-load 'flycheck
@@ -182,10 +178,11 @@
   (setq company-echo-delay 0)
   (setq-default company-dabbrev-downcase nil))
 (require 'company-go)
+(require 'company-web)
 
 (require 'smart-tabs-mode)
 (with-eval-after-load 'smart-tabs-mode
-  (smart-tabs-insinuate 'c 'javascript 'c++ 'java 'ruby 'cperl 'nxml))
+  (smart-tabs-insinuate 'c 'c++ 'java 'ruby 'cperl 'nxml))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Skeletons & Abbrevs
@@ -687,6 +684,25 @@ If in a GNU/Automake project, automatically build tags."
             (message "python-mode-settings applied")
             ))
 
+(add-hook 'php-mode
+          (lambda ()
+            (add-hook 'sylvain/show-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode -1))
+                      nil t)
+            (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode 1))
+                      nil t)
+            (add-function
+             :around (local 'abbrev-expand-function)
+             '(lambda (expand) (let ((local-abbrev-table
+                                      (sylvain/select-on-context
+                                       nil nil sylvain/php-abbrev-table)))
+                                 (funcall expand))))
+            (message "php-mode settings applied")
+            ))
+
 (add-hook 'go-mode-hook
           (lambda ()
             (local-set-key "\r" 'newline-and-indent)
@@ -705,12 +721,52 @@ If in a GNU/Automake project, automatically build tags."
             (whitespace-mode 1)
             (go-guru-hl-identifier-mode 1)
             (set (make-local-variable 'company-backends)
-                 '(company-go company-dabbrev-code))
+                 '(company-go company-dabbrev-code company-files company-dabbrev))
             (local-set-key [?\M-.] 'godef-jump)
             (local-set-key [?\M-,] 'pop-tag-mark)
             (setq-default gofmt-command "goimports")
             (add-hook 'before-save-hook #'gofmt-before-save nil t)
-             ))
+            (message "go-mode settings applied")
+            ))
+
+(add-hook 'web-mode-hook
+          (lambda ()
+            (add-hook 'sylvain/show-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode -1))
+                      nil t)
+            (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode 1))
+                      nil t)
+            (whitespace-mode 1)
+            (setq tab-width 2)
+            (setq web-mode-markup-indent-offset 2)
+            (setq web-mode-css-indent-offset 2)
+            (setq web-mode-code-indent-offset 2)
+            (setq web-mode-sql-indent-offset 2)
+            (setq web-mode-attr-indent-offset 2)
+            (setq web-mode-attr-value-indent-offset 2)
+            (setq web-mode-indentation-params
+                  '(("lineup-args"       . nil)
+                    ("lineup-calls"      . t)
+                    ("lineup-concats"    . t)
+                    ("lineup-quotes"     . t)
+                    ("lineup-ternary"    . t)
+                    ("case-extra-offset" . t)
+                    ))
+            (set (make-local-variable 'company-backends)
+                 '(company-web-html company-files company-dabbrev-code company-dabbrev))
+            (message "web-mode settings applied")
+            ))
+
+;; Auto-mode definition
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; more often C++...
+(add-to-list 'auto-mode-alist '("\\.l\\'" . c-mode))
+(add-to-list 'auto-mode-alist '("\\.l\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode))
+(add-to-list 'auto-mode-alist '("\\.y\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; GLOBAL SET KEYS
@@ -1707,7 +1763,7 @@ If in a GNU/Automake project, automatically build tags."
  '(column-number-mode t)
  '(package-selected-packages
    (quote
-    (exec-path-from-shell php-mode go-mode go-guru cmake-mode smart-tabs-mode company flycheck company-go)))
+    (exec-path-from-shell php-mode go-mode go-guru web-mode cmake-mode smart-tabs-mode company company-web company-go flycheck)))
  '(safe-local-variable-values
    (quote
     ((company-clang-arguments "-std=c++11")
