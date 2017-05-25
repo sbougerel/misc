@@ -1,4 +1,4 @@
-;;; emacs --- Sylvain Bougerel Emacs' configuration
+;; emacs --- Sylvain Bougerel Emacs' configuration
 
 ;;; Commentary:
 
@@ -82,26 +82,34 @@
 
 ;; Custom theme
 (require 'color)
-(set-foreground-color "gainsboro")
-(set-background-color "#33393d")
-(set-cursor-color "magenta")
-(set-mouse-color "white")
-(if (eq system-type 'darwin)
-    (progn
-      (set-face-attribute 'default nil :family "DejaVu Sans Mono")
-      (set-face-attribute 'default nil :height 120))
-  (set-frame-font "DejaVu Sans Mono-10" t))
-
-;; Frame-based (emacsclient) configuration
-(add-to-list 'default-frame-alist '(foreground-color . "gainsboro"))
-(add-to-list 'default-frame-alist '(background-color . "#33393d"))
-(add-to-list 'default-frame-alist '(cursor-color . "magenta"))
-(add-to-list 'default-frame-alist '(mouse-color . "white"))
-(if (eq system-type 'darwin)
-    (progn
-      (add-to-list 'default-frame-alist
-                   '(font . "-*-DejaVu Sans Mono-normal-normal-normal-*-*-120-*-*-m-0-iso10646-1")))
-  (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10")))
+(unless (display-graphic-p)
+  (set-foreground-color "white")
+  (set-background-color "color-236")
+  (set-cursor-color "magenta")
+  (set-mouse-color "white")
+  (add-to-list 'default-frame-alist '(foreground-color . "white"))
+  (add-to-list 'default-frame-alist '(background-color . "color-236"))
+  (add-to-list 'default-frame-alist '(cursor-color . "magenta"))
+  (add-to-list 'default-frame-alist '(mouse-color . "white")))
+(when (display-graphic-p)
+  (set-foreground-color "gainsboro")
+  (set-background-color "#33393d")
+  (set-cursor-color "magenta")
+  (set-mouse-color "white")
+  (if (eq system-type 'darwin)
+      (progn
+        (set-face-attribute 'default nil :family "DejaVu Sans Mono")
+        (set-face-attribute 'default nil :height 120))
+    (set-frame-font "DejaVu Sans Mono-10" t))
+  (add-to-list 'default-frame-alist '(foreground-color . "gainsboro"))
+  (add-to-list 'default-frame-alist '(background-color . "#33393d"))
+  (add-to-list 'default-frame-alist '(cursor-color . "magenta"))
+  (add-to-list 'default-frame-alist '(mouse-color . "white"))
+  (if (eq system-type 'darwin)
+      (progn
+        (add-to-list 'default-frame-alist
+                     '(font . "-*-DejaVu Sans Mono-normal-normal-normal-*-*-120-*-*-m-0-iso10646-1")))
+    (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
 
 ;; Make whitespace more subtle
 (require 'whitespace)
@@ -729,6 +737,26 @@ If in a GNU/Automake project, automatically build tags."
             (message "go-mode settings applied")
             ))
 
+(add-hook 'ruby-mode-hook
+          (lambda ()
+            (local-set-key "\r" 'newline-and-indent)
+            (auto-fill-mode 1)
+            (setq fill-column 120)
+            (setq adaptive-fill-mode t)
+            (setq tab-width 4)
+            (add-hook 'sylvain/show-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode -1))
+                      nil t)
+            (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda()
+                        (whitespace-mode 1))
+                      nil t)
+            (whitespace-mode 1)
+            (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+            (message "ruby-mode settings applied")
+            ))
+
 (add-hook 'web-mode-hook
           (lambda ()
             (add-hook 'sylvain/show-company-overlay-hook
@@ -802,7 +830,20 @@ If in a GNU/Automake project, automatically build tags."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EMACS SESSION
-(desktop-save-mode 1)
+(when (display-graphic-p)
+  ;; When using terminals, we generally don't care about the desktop.
+  (require 'desktop)
+  ;; Ensure that dead system processes don't own it.
+  (advice-add #'desktop-owner :around
+              '(lambda (original &rest args)
+                 (let ((owner (apply original args)))
+                   (if owner
+                       (car (member owner (list-system-processes)))))))
+  (setq desktop-load-locked-desktop nil)
+  (setq desktop-restore-eager 6) ;; generally enough
+  (setq desktop-auto-save-timeout 30)
+  (setq desktop-save nil) ;; desktop is autosaved according to timeout
+  (desktop-save-mode 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AUTO CORRECTION & OTHER GLOBAL ABBREVS
@@ -1763,7 +1804,7 @@ If in a GNU/Automake project, automatically build tags."
  '(column-number-mode t)
  '(package-selected-packages
    (quote
-    (exec-path-from-shell php-mode go-mode go-guru web-mode cmake-mode smart-tabs-mode company company-web company-go flycheck)))
+    (markdown-mode exec-path-from-shell php-mode go-mode go-guru web-mode cmake-mode smart-tabs-mode company company-web company-go flycheck)))
  '(safe-local-variable-values
    (quote
     ((company-clang-arguments "-std=c++11")

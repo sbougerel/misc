@@ -7,5 +7,7 @@ fi
 cp $HOME/.emacs dot.emacs
 rm -rf dot.emacs.d/*
 cp -a $HOME/.emacs.d/* dot.emacs.d/
+rm -f dot.emacs.d/elpa/*.txt
+rm -rf dot.emacs.d/eshell
 rm -f dot.emacs.d/.emacs.desktop
 rm -f dot.emacs.d/.emacs.desktop.lock
