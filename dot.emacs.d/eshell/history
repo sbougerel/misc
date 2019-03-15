@@ -1,0 +1,13 @@
+rb
+ruby 
+irb 
+rails c
+cd ~/
+cd Projects/myteksi/frontend/gamma/bin/
+./rails c
+bundle exec rails c
+bundle exec ./rails c
+cd ..
+cd ..
+./fe ssh
+exit

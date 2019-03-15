@@ -84,11 +84,11 @@
 (require 'color)
 (unless (display-graphic-p)
   (set-foreground-color "white")
-  (set-background-color "color-236")
+  (set-background-color "#303030")
   (set-cursor-color "magenta")
   (set-mouse-color "white")
   (add-to-list 'default-frame-alist '(foreground-color . "white"))
-  (add-to-list 'default-frame-alist '(background-color . "color-236"))
+  (add-to-list 'default-frame-alist '(background-color . "#303030"))
   (add-to-list 'default-frame-alist '(cursor-color . "magenta"))
   (add-to-list 'default-frame-alist '(mouse-color . "white")))
 (when (display-graphic-p)
@@ -829,21 +829,31 @@ If in a GNU/Automake project, automatically build tags."
 (global-set-key [?\C-x up] (lambda() (interactive) (other-window -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; EMACS SESSION
+;;; EMACS SAVING SESSION
 (when (display-graphic-p)
   ;; When using terminals, we generally don't care about the desktop.
   (require 'desktop)
+  (defun sylvain/desktop-owner-advice (original &rest args)
+    (let ((owner (apply original args)))
+      (if (and owner (/= owner (emacs-pid)))
+          (and (car (member owner (list-system-processes)))
+               (let (cmd (attrlist (process-attributes owner)))
+                 (if (not attrlist) owner
+                   (dolist (attr attrlist)
+                     (and (string= "comm" (car attr))
+                          (setq cmd (car attr))))
+                   (and cmd (string-match-p "[Ee]macs" cmd) owner))))
+        owner)))
   ;; Ensure that dead system processes don't own it.
-  (advice-add #'desktop-owner :around
-              '(lambda (original &rest args)
-                 (let ((owner (apply original args)))
-                   (if owner
-                       (car (member owner (list-system-processes)))))))
+  (advice-add #'desktop-owner :around #'sylvain/desktop-owner-advice)
   (setq desktop-load-locked-desktop nil)
   (setq desktop-restore-eager 6) ;; generally enough
   (setq desktop-auto-save-timeout 30)
   (setq desktop-save nil) ;; desktop is autosaved according to timeout
   (desktop-save-mode 1))
+
+;; Always saves the minibuffer
+(savehist-mode 1)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AUTO CORRECTION & OTHER GLOBAL ABBREVS
@@ -1804,7 +1814,7 @@ If in a GNU/Automake project, automatically build tags."
  '(column-number-mode t)
  '(package-selected-packages
    (quote
-    (markdown-mode exec-path-from-shell php-mode go-mode go-guru web-mode cmake-mode smart-tabs-mode company company-web company-go flycheck)))
+    (company-terraform terraform-mode yaml-mode markdown-mode exec-path-from-shell php-mode go-mode go-guru web-mode cmake-mode smart-tabs-mode company company-web company-go flycheck)))
  '(safe-local-variable-values
    (quote
     ((company-clang-arguments "-std=c++11")
