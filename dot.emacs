@@ -61,8 +61,19 @@
 ;; Set visible bell on
 (setq visible-bell t)
 
-;; Mouse wheel support
-(mouse-wheel-mode 1)
+;; Enable mouse support in terminal
+(unless window-system
+  (require 'mouse)
+  (xterm-mouse-mode t)
+  (global-set-key [mouse-4] (lambda ()
+                              (interactive)
+                              (scroll-down 1)))
+  (global-set-key [mouse-5] (lambda ()
+                              (interactive)
+                              (scroll-up 1)))
+  (defun track-mouse (e))
+  (setq mouse-sel-mode t)
+)
 
 ;; bye bye menubar
 (menu-bar-mode -1)
@@ -98,18 +109,15 @@
   (set-mouse-color "white")
   (if (eq system-type 'darwin)
       (progn
-        (set-face-attribute 'default nil :family "DejaVu Sans Mono")
-        (set-face-attribute 'default nil :height 120))
+        (set-face-attribute 'default nil :family "DejaVu Sans Mono for Powerline")
+        (set-face-attribute 'default nil :height 120)
+        (set-frame-font "-*-DejaVu Sans Mono for Powerline-normal-normal-normal-*-*-*-*-*-m-0-iso10646-1" t))
     (set-frame-font "DejaVu Sans Mono-10" t))
   (add-to-list 'default-frame-alist '(foreground-color . "gainsboro"))
   (add-to-list 'default-frame-alist '(background-color . "#33393d"))
   (add-to-list 'default-frame-alist '(cursor-color . "magenta"))
   (add-to-list 'default-frame-alist '(mouse-color . "white"))
-  (if (eq system-type 'darwin)
-      (progn
-        (add-to-list 'default-frame-alist
-                     '(font . "-*-DejaVu Sans Mono-normal-normal-normal-*-*-120-*-*-m-0-iso10646-1")))
-    (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
+  )
 
 ;; Make whitespace more subtle
 (require 'whitespace)
