@@ -21,9 +21,24 @@
 ;; packages.  Don't delete this line.  If you don't want it, just comment it out
 ;; by adding a semicolon to the start of the line.  You may delete these
 ;; explanatory comments.
+(require 'package)
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  (when no-ssl
+    (warn "\
+Your version of Emacs does not support SSL connections,
+which is unsafe because it allows man-in-the-middle attacks.
+There are two things you can do about this warning:
+1. Install an Emacs version that does support SSL and be safe.
+2. Remove this warning from your init file so you won't see it again."))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
-(add-to-list 'package-archives
-             '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
 
 ;; identification
 (setq user-full-name "Sylvain Bougerel")
@@ -72,6 +87,7 @@
                               (interactive)
                               (scroll-up 1)))
   (defun track-mouse (e))
+  (defvar mouse-sel-mode)
   (setq mouse-sel-mode t)
 )
 
@@ -120,29 +136,31 @@
   )
 
 ;; Make whitespace more subtle
-(require 'whitespace)
-(with-eval-after-load 'whitespace
-  (setq-default whitespace-style '(face tabs spaces trailing
-                                        space-before-tab indentation
-                                        space-after-tab space-mark tab-mark))
-  (set-face-background 'whitespace-space nil)
-  (set-face-foreground 'whitespace-space "gray43")
-  (set-face-background 'whitespace-hspace nil)
-  (set-face-foreground 'whitespace-hspace "gray43")
-  (set-face-background 'whitespace-space-before-tab nil)
-  (set-face-foreground 'whitespace-space-before-tab "gray43")
-  (set-face-background 'whitespace-space-after-tab nil)
-  (set-face-foreground 'whitespace-space-after-tab "gray43")
-  (set-face-background 'whitespace-tab nil)
-  (set-face-foreground 'whitespace-tab "gray43")
-  (set-face-background 'whitespace-newline nil)
-  (set-face-foreground 'whitespace-newline "gray43")
-  (set-face-background 'whitespace-empty nil)
-  (set-face-foreground 'whitespace-empty "gray43")
-  (set-face-background 'whitespace-indentation nil)
-  (set-face-foreground 'whitespace-indentation "gray43")
-  (set-face-background 'whitespace-trailing nil)
-  (set-face-foreground 'whitespace-trailing "red"))
+(when window-system
+  (require 'whitespace)
+  (with-eval-after-load 'whitespace
+    (setq-default whitespace-style '(face tabs spaces trailing
+                                          space-before-tab indentation
+                                          space-after-tab space-mark tab-mark))
+    (set-face-background 'whitespace-space nil)
+    (set-face-foreground 'whitespace-space "gray43")
+    (set-face-background 'whitespace-hspace nil)
+    (set-face-foreground 'whitespace-hspace "gray43")
+    (set-face-background 'whitespace-space-before-tab nil)
+    (set-face-foreground 'whitespace-space-before-tab "gray43")
+    (set-face-background 'whitespace-space-after-tab nil)
+    (set-face-foreground 'whitespace-space-after-tab "gray43")
+    (set-face-background 'whitespace-tab nil)
+    (set-face-foreground 'whitespace-tab "gray43")
+    (set-face-background 'whitespace-newline nil)
+    (set-face-foreground 'whitespace-newline "gray43")
+    (set-face-background 'whitespace-empty nil)
+    (set-face-foreground 'whitespace-empty "gray43")
+    (set-face-background 'whitespace-indentation nil)
+    (set-face-foreground 'whitespace-indentation "gray43")
+    (set-face-background 'whitespace-trailing nil)
+    (set-face-foreground 'whitespace-trailing "red"))
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Package loading: FlyCheck, Company, etc..
@@ -541,7 +559,12 @@ If in a GNU/Automake project, automatically build tags."
             (auto-fill-mode 1)
             (setq fill-column 80)
             (setq adaptive-fill-mode t)
-            (whitespace-mode 1)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda() (whitespace-mode 1)) nil t))
             (message "text-mode-hook applied")
             ))
 
@@ -574,15 +597,16 @@ If in a GNU/Automake project, automatically build tags."
             (auto-fill-mode 1)
             (setq fill-column 80)
             (setq adaptive-fill-mode t)
-            (whitespace-mode 1)
-            (add-hook 'sylvain/show-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode -1))
-                      nil t)
-            (add-hook 'sylvain/hide-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode 1))
-                      nil t)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda()
+                          (whitespace-mode -1))
+                        nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda()
+                          (whitespace-mode 1))
+                        nil t))
             (add-function
              :around (local 'abbrev-expand-function)
              '(lambda (expand) (let ((local-abbrev-table
@@ -623,15 +647,12 @@ If in a GNU/Automake project, automatically build tags."
             (auto-fill-mode 1)
             (setq fill-column 80)
             (setq adaptive-fill-mode t)
-            (whitespace-mode 1)
-            (add-hook 'sylvain/show-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode -1))
-                      nil t)
-            (add-hook 'sylvain/hide-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode 1))
-                      nil t)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                      (lambda() (whitespace-mode 1)) nil t))
             (add-function
              :around (local 'abbrev-expand-function)
              '(lambda (expand) (let ((local-abbrev-table
@@ -652,15 +673,12 @@ If in a GNU/Automake project, automatically build tags."
   (auto-fill-mode 1)
   (setq fill-column 80)
   (setq adaptive-fill-mode t)
-  (whitespace-mode 1)
-  (add-hook 'sylvain/show-company-overlay-hook
-            (lambda()
-              (whitespace-mode -1))
-            nil t)
-  (add-hook 'sylvain/hide-company-overlay-hook
-            (lambda()
-              (whitespace-mode 1))
-            nil t)
+  (when window-system
+    (whitespace-mode 1)
+    (add-hook 'sylvain/show-company-overlay-hook
+              (lambda() (whitespace-mode -1)) nil t)
+    (add-hook 'sylvain/hide-company-overlay-hook
+              (lambda() (whitespace-mode 1)) nil t))
   (add-function
    :around (local 'abbrev-expand-function)
    '(lambda (expand) (let ((local-abbrev-table
@@ -686,15 +704,12 @@ If in a GNU/Automake project, automatically build tags."
                                       (sylvain/select-on-context
                                        nil nil sylvain/python-abbrev-table)))
                                  (funcall expand))))
-            (add-hook 'sylvain/show-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode -1))
-                      nil t)
-            (add-hook 'sylvain/hide-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode 1))
-                      nil t)
-            (whitespace-mode 1)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda() (whitespace-mode 1)) nil t))
             (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
             (add-hook 'before-save-hook #'sylvain/file-untabify nil t)
             (message "python-mode-settings applied")
@@ -702,14 +717,12 @@ If in a GNU/Automake project, automatically build tags."
 
 (add-hook 'php-mode
           (lambda ()
-            (add-hook 'sylvain/show-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode -1))
-                      nil t)
-            (add-hook 'sylvain/hide-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode 1))
-                      nil t)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda() (whitespace-mode 1)) nil t))
             (add-function
              :around (local 'abbrev-expand-function)
              '(lambda (expand) (let ((local-abbrev-table
@@ -726,15 +739,12 @@ If in a GNU/Automake project, automatically build tags."
             (setq fill-column 120)
             (setq adaptive-fill-mode t)
             (setq tab-width 4)
-            (add-hook 'sylvain/show-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode -1))
-                      nil t)
-            (add-hook 'sylvain/hide-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode 1))
-                      nil t)
-            (whitespace-mode 1)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda() (whitespace-mode 1)) nil t))
             (go-guru-hl-identifier-mode 1)
             (set (make-local-variable 'company-backends)
                  '(company-go company-dabbrev-code company-files company-dabbrev))
@@ -752,30 +762,24 @@ If in a GNU/Automake project, automatically build tags."
             (setq fill-column 120)
             (setq adaptive-fill-mode t)
             (setq tab-width 4)
-            (add-hook 'sylvain/show-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode -1))
-                      nil t)
-            (add-hook 'sylvain/hide-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode 1))
-                      nil t)
-            (whitespace-mode 1)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda() (whitespace-mode 1)) nil t))
             (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
             (message "ruby-mode settings applied")
             ))
 
 (add-hook 'web-mode-hook
           (lambda ()
-            (add-hook 'sylvain/show-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode -1))
-                      nil t)
-            (add-hook 'sylvain/hide-company-overlay-hook
-                      (lambda()
-                        (whitespace-mode 1))
-                      nil t)
-            (whitespace-mode 1)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda() (whitespace-mode 1)) nil t))
             (setq tab-width 2)
             (setq web-mode-markup-indent-offset 2)
             (setq web-mode-css-indent-offset 2)
@@ -794,6 +798,19 @@ If in a GNU/Automake project, automatically build tags."
             (set (make-local-variable 'company-backends)
                  '(company-web-html company-files company-dabbrev-code company-dabbrev))
             (message "web-mode settings applied")
+            ))
+
+(add-hook 'terraform-mode-hook
+          (lambda ()
+            (local-set-key "\r" 'newline-and-indent)
+            (when window-system
+              (whitespace-mode 1)
+              (add-hook 'sylvain/show-company-overlay-hook
+                        (lambda() (whitespace-mode -1)) nil t)
+              (add-hook 'sylvain/hide-company-overlay-hook
+                        (lambda() (whitespace-mode 1)) nil t))
+            (terraform-format-on-save-mode)
+            (message "terraform-mode settings applied")
             ))
 
 ;; Auto-mode definition
@@ -838,7 +855,7 @@ If in a GNU/Automake project, automatically build tags."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EMACS SAVING SESSION
-(when (display-graphic-p)
+(when window-system
   ;; When using terminals, we generally don't care about the desktop.
   (require 'desktop)
   (defun sylvain/desktop-owner-advice (original &rest args)
@@ -1822,7 +1839,7 @@ If in a GNU/Automake project, automatically build tags."
  '(column-number-mode t)
  '(package-selected-packages
    (quote
-    (company-terraform terraform-mode yaml-mode markdown-mode exec-path-from-shell php-mode go-mode go-guru web-mode cmake-mode smart-tabs-mode company company-web company-go flycheck)))
+    (pager kotlin-mode guru-mode yafolding json-mode protobuf-mode company-terraform terraform-mode yaml-mode markdown-mode exec-path-from-shell php-mode go-mode go-guru web-mode cmake-mode smart-tabs-mode company company-web company-go flycheck)))
  '(safe-local-variable-values
    (quote
     ((company-clang-arguments "-std=c++11")
